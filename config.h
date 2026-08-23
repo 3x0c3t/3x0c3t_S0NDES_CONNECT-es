@@ -3,7 +3,7 @@
 
 #define SERIAL_BAUDRATE 115200
 
-#define HOSTNAME "FRIGO_20260803"
+#define HOSTNAME "S0NDES_CONNECTEES"
 
 #define WIFI_SSID "N0wifiHere"
 #define WIFI_PASSWORD "@PassWeurd"
