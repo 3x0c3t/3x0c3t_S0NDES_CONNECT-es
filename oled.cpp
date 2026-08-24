@@ -25,11 +25,10 @@ void oledInit()
 
 
 
-void splashScreen()
+
+void oledSplash()
 {
-
     oled.clearBuffer();
-
 
     oled.setFont(u8g2_font_fub20_tr);
 
@@ -39,7 +38,6 @@ void splashScreen()
         "-3x0c3t-"
     );
 
-
     oled.setFont(u8g2_font_7x13_tr);
 
     oled.drawStr(
@@ -48,14 +46,8 @@ void splashScreen()
         "L4B"
     );
 
-
     oled.sendBuffer();
-
-
-    delay(2000);
 }
-
-
 
 void wifiScreen(bool ok,String ip)
 {

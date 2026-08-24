@@ -13,3 +13,4 @@ void temperatureScreen();
 
 
 #endif
+void oledSplash();
