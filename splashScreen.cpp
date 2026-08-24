@@ -1,5 +1,5 @@
 #include "splashScreen.h"
-#include "oled.h"
+
 
 void splashScreen()
 {
