@@ -5,7 +5,7 @@
 #include <U8g2lib.h>
 
 #include "globals.h"
-#include "defines.h"
+#include "settings.h"
 
 
 

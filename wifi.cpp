@@ -26,7 +26,7 @@ void wifiInit()
     uint8_t timeout = 0;
 
 
-    while(
+    while (
         WiFi.status() != WL_CONNECTED &&
         timeout < WIFI_TIMEOUT
     )
@@ -40,9 +40,8 @@ void wifiInit()
     Serial.println();
 
 
-    if(WiFi.status() == WL_CONNECTED)
+    if (WiFi.status() == WL_CONNECTED)
     {
-
         Serial.println("WiFi OK");
 
 
@@ -52,22 +51,31 @@ void wifiInit()
         wifiScreen(true, ip);
 
 
-        successBeep();
+        // ==========================================
+        // CONNEXION WIFI REUSSIE
+        // ==========================================
 
+        wifiSuccessBeep();
 
-        for(int i=0;i<3;i++)
-        {
-            ledsRainbow();
-        }
+        ledsGreenBlink3();
 
     }
     else
     {
-
         Serial.println("WiFi FAIL");
 
 
-        wifiScreen(false,"");
+        wifiScreen(false, "");
 
+
+        // ==========================================
+        // CONNEXION WIFI ECHOUEE
+        // ==========================================
+
+        wifiFailureBeep();
+
+        ledsOrangeFade();
+
+        ledsRedBlink3();
     }
 }

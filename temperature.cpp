@@ -3,7 +3,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#include "defines.h"
+#include "settings.h"
 
 OneWire oneWire(ONE_WIRE_BUS);
 

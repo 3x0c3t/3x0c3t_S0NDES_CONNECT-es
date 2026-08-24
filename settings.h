@@ -1,5 +1,5 @@
-#ifndef DEFINES_H
-#define DEFINES_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
 #define OLED_SDA 4
 #define OLED_SCL 5

@@ -10,5 +10,11 @@ void ledsTest();
 
 void ledsRainbow();
 
+void ledsGreenBlink3();
+
+void ledsRedBlink3();
+
+void ledsOrangeFade();
+
 
 #endif
