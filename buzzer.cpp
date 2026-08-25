@@ -1,5 +1,6 @@
 #include "buzzer.h"
 #include "settings.h"
+#include "bootscreen.h"
 #include <Arduino.h>
 
 
@@ -24,6 +25,8 @@ void startupMelody()
     beep(523, 150);   // Do
     beep(659, 150);   // Mi
     beep(784, 250);   // Sol
+
+    bootBuzzerStatus(true);
 }
 
 

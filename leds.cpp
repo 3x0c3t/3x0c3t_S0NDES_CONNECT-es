@@ -1,5 +1,6 @@
 #include "leds.h"
 #include "settings.h"
+#include "bootscreen.h"
 #include <Arduino.h>
 
 
@@ -18,6 +19,8 @@ void ledsOff()
     analogWrite(LED_BLUE, 0);
     analogWrite(LED_GREEN, 0);
     analogWrite(LED_RED, 0);
+
+    bootLedStatus(true);
 }
 
 

@@ -6,6 +6,7 @@
 #include "buzzer.h"
 #include "oled.h"
 #include "splashScreen.h"
+#include "bootscreen.h"
 #include "wifi.h"
 #include "webserver.h"
 #include "temperature.h"
@@ -19,6 +20,7 @@ void setup()
 
     oledInit();
     splashScreen();
+    bootScreen();
 
     ledsTest();
     startupMelody();

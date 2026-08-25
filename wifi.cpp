@@ -4,6 +4,7 @@
 
 #include "config.h"
 #include "oled.h"
+#include "bootscreen.h"
 #include "buzzer.h"
 #include "leds.h"
 
@@ -47,6 +48,8 @@ void wifiInit()
 
         String ip = WiFi.localIP().toString();
 
+        bootWifiStatus(true);
+        bootIpAddress(ip.c_str());
 
         wifiScreen(true, ip);
 
@@ -64,6 +67,8 @@ void wifiInit()
     {
         Serial.println("WiFi FAIL");
 
+
+        bootWifiStatus(false);
 
         wifiScreen(false, "");
 

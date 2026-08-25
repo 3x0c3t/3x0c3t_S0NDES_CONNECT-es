@@ -32,6 +32,12 @@ static void drawBootScreen()
         buzzerOK ? "BUZZER : OK" : "BUZZER : ..."
     );
 
+    if (wifiOK && ipAddress.length() > 0)
+    {
+        oled.setFont(u8g2_font_5x8_tr);
+        oled.drawStr(0, 63, ipAddress.c_str());
+    }
+
     oled.sendBuffer();
 }
 
