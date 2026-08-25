@@ -1,98 +1,277 @@
 #include "webserver.h"
 
+#include <Arduino.h>
 #include <ESP8266WebServer.h>
-
-#include "globals.h"
+#include <ESP8266WiFi.h>
 
 #include "html.h"
-#include "css.h"
-#include "js.h"
+#include "temperature.h"
+#include "leds.h"
+#include "buzzer.h"
 
+extern float temperatures[];
+extern uint8_t sensorCount;
 
 ESP8266WebServer server(80);
 
 
+// ============================================================
+// PAGE PRINCIPALE
+// ============================================================
 
 void handleRoot()
 {
-
-String page=htmlPage;
-
-page.replace("%CSS%",cssStyle);
-
-page.replace("%JS%",jsScript);
-
-
-server.send(
-200,
-"text/html",
-page
-);
-
+    server.send(
+        200,
+        "text/html",
+        HTML_PAGE
+    );
 }
 
 
+// ============================================================
+// ÉTAT DU SYSTÈME
+// ============================================================
 
-void handleTemperature()
+void handleStatus()
 {
+    String json = "{";
 
-String json="{";
+    json += "\"wifi\":";
+    json += (WiFi.status() == WL_CONNECTED ? "true" : "false");
+
+    json += ",\"ssid\":\"";
+    json += WiFi.SSID();
+    json += "\"";
+
+    json += ",\"ip\":\"";
+    json += WiFi.localIP().toString();
+    json += "\"";
+
+    json += ",\"rssi\":";
+    json += String(WiFi.RSSI());
+
+    json += ",\"uptime\":";
+    json += String(millis());
+
+    json += "}";
+
+    server.send(
+        200,
+        "application/json",
+        json
+    );
+}
 
 
-json+="\"count\":";
-json+=sensorCount;
-json+=",";
+// ============================================================
+// TEMPÉRATURES
+// ============================================================
 
-
-json+="\"temperatures\":[";
-
-
-for(uint8_t i=0;i<sensorCount;i++)
+void handleTemperatures()
 {
+    String json = "{";
+    json += "\"count\":";
+    json += String(sensorCount);
+    json += ",\"values\":[";
 
-json+=String(temperatures[i],2);
+    for (uint8_t i = 0; i < sensorCount; i++)
+    {
+        if (i > 0)
+            json += ",";
 
-if(i<sensorCount-1)
-json+=",";
+        json += String(temperatures[i], 2);
+    }
 
+    json += "]}";
+
+    server.send(
+        200,
+        "application/json",
+        json
+    );
 }
 
 
-json+="]}";
+// ============================================================
+// LED
+// ============================================================
 
+void handleLed()
+{
+    if (!server.hasArg("color"))
+    {
+        server.send(
+            400,
+            "text/plain",
+            "Missing color"
+        );
 
-server.send(
-200,
-"application/json",
-json
-);
+        return;
+    }
 
+    String color = server.arg("color");
+
+    if (color == "off")
+    {
+        ledsOff();
+    }
+    else if (color == "green")
+    {
+        ledsGreenBlink3();
+    }
+    else if (color == "red")
+    {
+        ledsRedBlink3();
+    }
+    else if (color == "orange")
+    {
+        ledsOrangeFade();
+    }
+    else if (color == "rainbow")
+    {
+        ledsRainbow();
+    }
+    else
+    {
+        server.send(
+            400,
+            "text/plain",
+            "Unknown LED command"
+        );
+
+        return;
+    }
+
+    server.send(
+        200,
+        "application/json",
+        "{\"ok\":true}"
+    );
 }
 
 
+// ============================================================
+// BUZZER
+// ============================================================
+
+void handleBuzzer()
+{
+    if (!server.hasArg("action"))
+    {
+        server.send(
+            400,
+            "text/plain",
+            "Missing action"
+        );
+
+        return;
+    }
+
+    String action = server.arg("action");
+
+    if (action == "beep")
+    {
+        beep(1200, 150);
+    }
+    else if (action == "success")
+    {
+        successBeep();
+    }
+    else if (action == "startup")
+    {
+        startupMelody();
+    }
+    else
+    {
+        server.send(
+            400,
+            "text/plain",
+            "Unknown buzzer command"
+        );
+
+        return;
+    }
+
+    server.send(
+        200,
+        "application/json",
+        "{\"ok\":true}"
+    );
+}
+
+
+// ============================================================
+// REBOOT
+// ============================================================
+
+void handleReboot()
+{
+    server.send(
+        200,
+        "application/json",
+        "{\"ok\":true,\"message\":\"Rebooting\"}"
+    );
+
+    delay(300);
+
+    ESP.restart();
+}
+
+
+// ============================================================
+// INITIALISATION
+// ============================================================
 
 void webserverInit()
 {
+    server.on(
+        "/",
+        HTTP_GET,
+        handleRoot
+    );
 
-server.on("/",handleRoot);
+    server.on(
+        "/api/status",
+        HTTP_GET,
+        handleStatus
+    );
 
-server.on(
-"/temperature",
-handleTemperature
-);
+    server.on(
+        "/api/temperatures",
+        HTTP_GET,
+        handleTemperatures
+    );
 
+    server.on(
+        "/api/led",
+        HTTP_GET,
+        handleLed
+    );
 
-server.begin();
+    server.on(
+        "/api/buzzer",
+        HTTP_GET,
+        handleBuzzer
+    );
 
+    server.on(
+        "/api/reboot",
+        HTTP_GET,
+        handleReboot
+    );
 
-Serial.println("HTTP OK");
+    server.begin();
 
+    Serial.println("Webserver OK");
 }
 
 
+// ============================================================
+// BOUCLE
+// ============================================================
 
 void webserverLoop()
 {
-server.handleClient();
+    server.handleClient();
 }
-
