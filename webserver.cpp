@@ -27,7 +27,7 @@ ESP8266WebServer server(80);
 
 void handleRoot()
 {
-    server.send(
+    server.send_P(
         200,
         "text/html",
         HTML_PAGE
@@ -41,10 +41,10 @@ void handleRoot()
 
 void handleCSS()
 {
-    server.send(
+    server.send_P(
         200,
         "text/css",
-        CSS_PAGE
+        cssStyle
     );
 }
 
@@ -55,7 +55,7 @@ void handleCSS()
 
 void handleJS()
 {
-    server.send(
+    server.send_P(
         200,
         "application/javascript",
         JS_PAGE
@@ -72,7 +72,11 @@ void handleStatus()
     String json = "{";
 
     json += "\"wifi\":";
-    json += (WiFi.status() == WL_CONNECTED ? "true" : "false");
+    json += (
+        WiFi.status() == WL_CONNECTED
+        ? "true"
+        : "false"
+    );
 
     json += ",\"ssid\":\"";
     json += WiFi.SSID();
@@ -118,7 +122,10 @@ void handleTemperatures()
             json += ",";
         }
 
-        json += String(temperatures[i], 2);
+        json += String(
+            temperatures[i],
+            2
+        );
     }
 
     json += "]}";
@@ -137,19 +144,52 @@ void handleTemperatures()
 
 void handleLED()
 {
+    if (!server.hasArg("color"))
+    {
+        server.send(
+            400,
+            "application/json",
+            "{\"ok\":false,\"error\":\"missing color\"}"
+        );
+
+        return;
+    }
+
     String color = server.arg("color");
 
     if (color == "red")
     {
-        ledsRedBlink3();
+        digitalWrite(LED_RED, HIGH);
+        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_BLUE, LOW);
     }
     else if (color == "green")
     {
-        ledsGreenBlink3();
+        digitalWrite(LED_RED, LOW);
+        digitalWrite(LED_GREEN, HIGH);
+        digitalWrite(LED_BLUE, LOW);
     }
-    else if (color == "orange")
+    else if (color == "blue")
     {
-        ledsOrangeFade();
+        digitalWrite(LED_RED, LOW);
+        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_BLUE, HIGH);
+    }
+    else if (color == "off")
+    {
+        digitalWrite(LED_RED, LOW);
+        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_BLUE, LOW);
+    }
+    else
+    {
+        server.send(
+            400,
+            "application/json",
+            "{\"ok\":false,\"error\":\"invalid color\"}"
+        );
+
+        return;
     }
 
     server.send(
@@ -166,15 +206,44 @@ void handleLED()
 
 void handleBuzzer()
 {
+    if (!server.hasArg("action"))
+    {
+        server.send(
+            400,
+            "application/json",
+            "{\"ok\":false,\"error\":\"missing action\"}"
+        );
+
+        return;
+    }
+
     String action = server.arg("action");
 
-    if (action == "success")
+    if (action == "on")
     {
-        wifiSuccessBeep();
+        digitalWrite(BUZZER_PIN, HIGH);
     }
-    else if (action == "failure")
+    else if (action == "off")
     {
-        wifiFailureBeep();
+        digitalWrite(BUZZER_PIN, LOW);
+    }
+    else if (action == "beep")
+    {
+        digitalWrite(BUZZER_PIN, HIGH);
+
+        delay(150);
+
+        digitalWrite(BUZZER_PIN, LOW);
+    }
+    else
+    {
+        server.send(
+            400,
+            "application/json",
+            "{\"ok\":false,\"error\":\"invalid action\"}"
+        );
+
+        return;
     }
 
     server.send(
@@ -204,16 +273,39 @@ void handleReboot()
 
 
 // ============================================================
+// NOT FOUND
+// ============================================================
+
+void handleNotFound()
+{
+    server.send(
+        404,
+        "text/plain",
+        "Not found: " + server.uri()
+    );
+}
+
+
+// ============================================================
 // INITIALISATION
 // ============================================================
 
 void webserverInit()
 {
+    // --------------------------------------------------------
+    // PAGE PRINCIPALE
+    // --------------------------------------------------------
+
     server.on(
         "/",
         HTTP_GET,
         handleRoot
     );
+
+
+    // --------------------------------------------------------
+    // CSS
+    // --------------------------------------------------------
 
     server.on(
         "/style.css",
@@ -221,11 +313,21 @@ void webserverInit()
         handleCSS
     );
 
+
+    // --------------------------------------------------------
+    // JAVASCRIPT
+    // --------------------------------------------------------
+
     server.on(
         "/script.js",
         HTTP_GET,
         handleJS
     );
+
+
+    // --------------------------------------------------------
+    // API STATUS
+    // --------------------------------------------------------
 
     server.on(
         "/api/status",
@@ -233,11 +335,21 @@ void webserverInit()
         handleStatus
     );
 
+
+    // --------------------------------------------------------
+    // API TEMPERATURES
+    // --------------------------------------------------------
+
     server.on(
         "/api/temperatures",
         HTTP_GET,
         handleTemperatures
     );
+
+
+    // --------------------------------------------------------
+    // API LED
+    // --------------------------------------------------------
 
     server.on(
         "/api/led",
@@ -245,11 +357,21 @@ void webserverInit()
         handleLED
     );
 
+
+    // --------------------------------------------------------
+    // API BUZZER
+    // --------------------------------------------------------
+
     server.on(
         "/api/buzzer",
         HTTP_GET,
         handleBuzzer
     );
+
+
+    // --------------------------------------------------------
+    // API REBOOT
+    // --------------------------------------------------------
 
     server.on(
         "/api/reboot",
@@ -257,9 +379,25 @@ void webserverInit()
         handleReboot
     );
 
+
+    // --------------------------------------------------------
+    // 404
+    // --------------------------------------------------------
+
+    server.onNotFound(
+        handleNotFound
+    );
+
+
+    // --------------------------------------------------------
+    // START
+    // --------------------------------------------------------
+
     server.begin();
 
-    Serial.println("Webserver OK");
+    Serial.println(
+        "Webserver OK"
+    );
 }
 
 
