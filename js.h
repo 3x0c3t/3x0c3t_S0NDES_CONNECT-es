@@ -1,26 +1,7 @@
 #ifndef JS_H
 #define JS_H
 
-#include <Arduino.h>
-
 const char JS_PAGE[] PROGMEM = R"rawliteral(
-
-/* ============================================================
-   CONFIGURATION
-   ============================================================ */
-
-const DEFAULT_REFRESH_INTERVAL = 2;
-const MIN_REFRESH_INTERVAL = 1;
-const MAX_REFRESH_INTERVAL = 60;
-
-let refreshInterval =
-    DEFAULT_REFRESH_INTERVAL;
-
-let refreshTimer = null;
-
-let temperatureRequestRunning = false;
-let statusRequestRunning = false;
-
 
 /* ============================================================
    API
@@ -29,17 +10,16 @@ let statusRequestRunning = false;
 async function api(url)
 {
     const response = await fetch(
-        url,
+        url + "?t=" + Date.now(),
         {
+            method: "GET",
             cache: "no-store"
         }
     );
 
     if (!response.ok)
     {
-        throw new Error(
-            "HTTP " + response.status
-        );
+        throw new Error("HTTP " + response.status);
     }
 
     return await response.json();
@@ -47,243 +27,97 @@ async function api(url)
 
 
 /* ============================================================
-   CONSIGNES
-   ============================================================ */
-
-function getSetpoint(index)
-{
-    const key =
-        "sensor_setpoint_" + index;
-
-    const stored =
-        localStorage.getItem(key);
-
-    if (stored === null)
-    {
-        return 25.0;
-    }
-
-    const value =
-        Number(stored);
-
-    if (!Number.isFinite(value))
-    {
-        return 25.0;
-    }
-
-    return value;
-}
-
-
-function saveSetpoint(index, value)
-{
-    localStorage.setItem(
-        "sensor_setpoint_" + index,
-        value.toFixed(1)
-    );
-}
-
-
-function changeSetpoint(index, delta)
-{
-    let value =
-        getSetpoint(index);
-
-    value += delta;
-
-    /*
-       Limites volontairement larges.
-       La consigne reste une fonction Web
-       tant qu'aucune API matérielle n'est définie.
-    */
-
-    value =
-        Math.max(
-            -40,
-            Math.min(
-                100,
-                value
-            )
-        );
-
-    saveSetpoint(
-        index,
-        value
-    );
-
-    updateTemperatures();
-}
-
-
-/* ============================================================
-   ETAT D'UNE SONDE
-   ============================================================ */
-
-function getSensorState(
-    temperature,
-    setpoint
-)
-{
-    const tolerance = 0.5;
-
-    if (
-        temperature <
-        setpoint - tolerance
-    )
-    {
-        return {
-            text: "BAS",
-            className: "sensor-low"
-        };
-    }
-
-    if (
-        temperature >
-        setpoint + tolerance
-    )
-    {
-        return {
-            text: "HAUT",
-            className: "sensor-high"
-        };
-    }
-
-    return {
-        text: "OK",
-        className: "sensor-ok"
-    };
-}
-
-
-/* ============================================================
-   ETAT DU SYSTEME
+   ÉTAT
    ============================================================ */
 
 async function updateStatus()
 {
-    if (statusRequestRunning)
-    {
-        return;
-    }
-
-    statusRequestRunning = true;
-
     try
     {
-        const data =
-            await api(
-                "/api/status"
-            );
+        const data = await api("/api/status");
 
-        let html = "";
+        const element = document.getElementById("status");
 
-        html +=
+        if (!element)
+        {
+            return;
+        }
+
+        element.innerHTML =
             "<p>WiFi : " +
             (
                 data.wifi
-                ?
-                '<span class="ok">CONNECTÉ</span>'
-                :
-                '<span class="error">ERREUR</span>'
+                ? '<span class="ok">CONNECTÉ</span>'
+                : '<span class="error">ERREUR</span>'
             ) +
-            "</p>";
+            "</p>" +
 
-        html +=
             "<p>SSID : <strong>" +
-            escapeHTML(
-                data.ssid
-            ) +
-            "</strong></p>";
+            (data.ssid || "-") +
+            "</strong></p>" +
 
-        html +=
             "<p>IP : <strong>" +
-            escapeHTML(
-                data.ip
-            ) +
-            "</strong></p>";
+            (data.ip || "-") +
+            "</strong></p>" +
 
-        html +=
             "<p>Signal : " +
-            Number(
-                data.rssi
-            ) +
-            " dBm</p>";
+            (data.rssi ?? "-") +
+            " dBm</p>" +
 
-        html +=
             "<p>Uptime : " +
-            Number(
-                data.uptime
-            ) +
+            Math.floor((data.uptime || 0) / 1000) +
             " s</p>";
-
-        const element =
-            document.getElementById(
-                "status"
-            );
-
-        if (element)
-        {
-            element.innerHTML =
-                html;
-        }
     }
     catch (error)
     {
-        console.error(
+        console.warn(
             "ESP temporairement inaccessible",
             error
         );
 
         const element =
-            document.getElementById(
-                "status"
-            );
+            document.getElementById("status");
 
         if (element)
         {
             element.innerHTML =
                 '<span class="error">' +
-                'ESP temporairement inaccessible' +
-                '</span>';
+                "ESP temporairement inaccessible" +
+                "</span>";
         }
-    }
-    finally
-    {
-        statusRequestRunning = false;
     }
 }
 
 
 /* ============================================================
-   TEMPERATURES
+   TEMPÉRATURES
    ============================================================ */
 
 async function updateTemperatures()
 {
-    if (temperatureRequestRunning)
-    {
-        return;
-    }
-
-    temperatureRequestRunning = true;
-
     try
     {
         const data =
-            await api(
-                "/api/temperatures"
-            );
+            await api("/api/temperatures");
 
-        if (
-            !data ||
-            !Array.isArray(
-                data.temperatures
-            )
-        )
+        if (!data)
+        {
+            throw new Error("Réponse vide");
+        }
+
+        if (!Array.isArray(data.temperatures))
         {
             throw new Error(
-                "Format température invalide"
+                "Format JSON températures invalide"
             );
+        }
+
+        const element =
+            document.getElementById("temperatures");
+
+        if (!element)
+        {
+            return;
         }
 
         let html = "";
@@ -295,251 +129,43 @@ async function updateTemperatures()
         )
         {
             const temperature =
-                Number(
-                    data.temperatures[i]
-                );
+                Number(data.temperatures[i]);
 
-            if (
-                !Number.isFinite(
-                    temperature
-                )
-            )
-            {
-                continue;
-            }
-
-            const setpoint =
-                getSetpoint(i);
-
-            const state =
-                getSensorState(
-                    temperature,
-                    setpoint
-                );
+            const value =
+                Number.isFinite(temperature)
+                ? temperature.toFixed(2)
+                : "--";
 
             html +=
-
-                '<div class="sensor-card">' +
-
-                    '<div class="sensor-header">' +
-
-                        '<span class="sensor-name">' +
-                            '🌡️ Sonde S' +
-                            (i + 1) +
-                        '</span>' +
-
-                        '<span class="sensor-state ' +
-                            state.className +
-                        '">' +
-                            state.text +
-                        '</span>' +
-
-                    '</div>' +
-
-                    '<div class="sensor-temperature">' +
-                        temperature.toFixed(2) +
-                        ' °C' +
-                    '</div>' +
-
-                    '<div class="sensor-setpoint">' +
-
-                        '<div>' +
-
-                            '<div class="setpoint-label">' +
-                                'Consigne' +
-                            '</div>' +
-
-                            '<div class="setpoint-value">' +
-                                setpoint.toFixed(1) +
-                                ' °C' +
-                            '</div>' +
-
-                        '</div>' +
-
-                        '<div class="setpoint-buttons">' +
-
-                            '<button ' +
-                                'class="setpoint-button" ' +
-                                'type="button" ' +
-                                'onclick="changeSetpoint(' +
-                                i +
-                                ',-0.5)"' +
-                            '>' +
-                                '−' +
-                            '</button>' +
-
-                            '<button ' +
-                                'class="setpoint-button" ' +
-                                'type="button" ' +
-                                'onclick="changeSetpoint(' +
-                                i +
-                                ',0.5)"' +
-                            '>' +
-                                '+' +
-                            '</button>' +
-
-                        '</div>' +
-
-                    '</div>' +
-
-                '</div>';
+                '<div class="temperature">' +
+                "<strong>S" +
+                (i + 1) +
+                "</strong> : " +
+                value +
+                " °C" +
+                "</div>";
         }
 
-        const element =
-            document.getElementById(
-                "temperatures"
-            );
-
-        if (element)
-        {
-            element.innerHTML =
-                html;
-        }
+        element.innerHTML = html;
     }
     catch (error)
     {
-        console.error(
+        console.warn(
             "Températures temporairement indisponibles",
             error
         );
 
         const element =
-            document.getElementById(
-                "temperatures"
-            );
+            document.getElementById("temperatures");
 
-        /*
-           On ne détruit pas immédiatement
-           l'affichage précédent.
-
-           Cela évite que l'interface clignote
-           à chaque perte Wi-Fi.
-        */
-
-        if (
-            element &&
-            !element.children.length
-        )
+        if (element)
         {
             element.innerHTML =
                 '<span class="error">' +
-                'Températures temporairement indisponibles' +
-                '</span>';
+                "Températures temporairement indisponibles" +
+                "</span>";
         }
     }
-    finally
-    {
-        temperatureRequestRunning = false;
-    }
-}
-
-
-/* ============================================================
-   RAFRAICHISSEMENT
-   ============================================================ */
-
-function loadRefreshInterval()
-{
-    const stored =
-        localStorage.getItem(
-            "refresh_interval"
-        );
-
-    if (stored !== null)
-    {
-        const value =
-            Number(stored);
-
-        if (
-            Number.isFinite(value) &&
-            value >= MIN_REFRESH_INTERVAL &&
-            value <= MAX_REFRESH_INTERVAL
-        )
-        {
-            refreshInterval =
-                Math.round(value);
-        }
-    }
-
-    const input =
-        document.getElementById(
-            "refreshInterval"
-        );
-
-    if (input)
-    {
-        input.value =
-            refreshInterval;
-    }
-}
-
-
-function applyRefreshInterval()
-{
-    const input =
-        document.getElementById(
-            "refreshInterval"
-        );
-
-    if (!input)
-    {
-        return;
-    }
-
-    let value =
-        Number(
-            input.value
-        );
-
-    if (!Number.isFinite(value))
-    {
-        value =
-            DEFAULT_REFRESH_INTERVAL;
-    }
-
-    value =
-        Math.round(value);
-
-    value =
-        Math.max(
-            MIN_REFRESH_INTERVAL,
-            Math.min(
-                MAX_REFRESH_INTERVAL,
-                value
-            )
-        );
-
-    refreshInterval =
-        value;
-
-    input.value =
-        value;
-
-    localStorage.setItem(
-        "refresh_interval",
-        value
-    );
-
-    startRefreshTimer();
-
-    updateTemperatures();
-}
-
-
-function startRefreshTimer()
-{
-    if (refreshTimer !== null)
-    {
-        clearInterval(
-            refreshTimer
-        );
-    }
-
-    refreshTimer =
-        setInterval(
-            updateTemperatures,
-            refreshInterval * 1000
-        );
 }
 
 
@@ -553,12 +179,8 @@ async function led(color)
     {
         await api(
             "/api/led?color=" +
-            encodeURIComponent(
-                color
-            )
+            encodeURIComponent(color)
         );
-
-        updateStatus();
     }
     catch (error)
     {
@@ -580,9 +202,7 @@ async function buzzer(action)
     {
         await api(
             "/api/buzzer?action=" +
-            encodeURIComponent(
-                action
-            )
+            encodeURIComponent(action)
         );
     }
     catch (error)
@@ -610,77 +230,35 @@ async function reboot()
         return;
     }
 
-    /*
-       On arrête les requêtes périodiques
-       avant le reboot.
-
-       Cela évite de bombarder l'ESP
-       pendant qu'il redémarre.
-    */
-
-    if (refreshTimer !== null)
-    {
-        clearInterval(
-            refreshTimer
-        );
-
-        refreshTimer = null;
-    }
-
     try
     {
-        await fetch(
-            "/api/reboot",
-            {
-                cache: "no-store"
-            }
-        );
+        await api("/api/reboot");
     }
     catch (error)
     {
         /*
-           Normal :
-           l'ESP peut couper la connexion
-           avant que fetch reçoive la réponse.
-        */
+         * Normal :
+         * l'ESP peut couper la connexion
+         * pendant son redémarrage.
+         */
     }
 
-    const status =
-        document.getElementById(
-            "status"
-        );
+    const element =
+        document.getElementById("status");
 
-    if (status)
+    if (element)
     {
-        status.innerHTML =
-            '<span class="error">' +
-            'Redémarrage en cours...' +
-            '</span>';
+        element.innerHTML =
+            '<span class="ok">' +
+            "Redémarrage en cours..." +
+            "</span>";
     }
-
-    /*
-       L'ESP redémarre.
-       On attend avant de recommencer
-       les requêtes.
-    */
-
-    setTimeout(
-        function()
-        {
-            updateStatus();
-            updateTemperatures();
-            startRefreshTimer();
-        },
-        5000
-    );
 }
 
 
 /*
-   Compatibilité avec le HTML.
-   Le bouton appelle rebootESP().
-*/
-
+ * Compatibilité avec l'ancien HTML
+ */
 function rebootESP()
 {
     reboot();
@@ -688,32 +266,294 @@ function rebootESP()
 
 
 /* ============================================================
-   SECURITE HTML
+   INTERVALLE DE RAFRAÎCHISSEMENT
    ============================================================ */
 
-function escapeHTML(value)
+let refreshInterval = 5;
+let refreshTimer = null;
+let refreshBusy = false;
+
+
+/* ============================================================
+   LECTURE DE L'INTERVALLE
+   ============================================================ */
+
+function getRefreshInterval()
 {
-    return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
+    const element =
+        document.getElementById(
+            "refreshInterval"
         );
+
+    if (!element)
+    {
+        return 5;
+    }
+
+    let value =
+        parseInt(element.value, 10);
+
+    if (!Number.isFinite(value))
+    {
+        value = 5;
+    }
+
+    if (value < 1)
+    {
+        value = 1;
+    }
+
+    if (value > 60)
+    {
+        value = 60;
+    }
+
+    return value;
+}
+
+
+/* ============================================================
+   RAFRAÎCHISSEMENT COMPLET
+   ============================================================ */
+
+async function refreshAll()
+{
+    /*
+     * Empêche plusieurs cycles simultanés.
+     */
+    if (refreshBusy)
+    {
+        return;
+    }
+
+    refreshBusy = true;
+
+    try
+    {
+        /*
+         * IMPORTANT :
+         * Les deux requêtes sont séquentielles.
+         * Pas de bombardement simultané de l'ESP.
+         */
+
+        await updateStatus();
+
+        await new Promise(
+            resolve => setTimeout(resolve, 50)
+        );
+
+        await updateTemperatures();
+    }
+    finally
+    {
+        refreshBusy = false;
+    }
+}
+
+
+/* ============================================================
+   TIMER
+   ============================================================ */
+
+function startRefreshTimer()
+{
+    if (refreshTimer !== null)
+    {
+        clearTimeout(refreshTimer);
+    }
+
+    refreshInterval =
+        getRefreshInterval();
+
+    async function loop()
+    {
+        await refreshAll();
+
+        refreshInterval =
+            getRefreshInterval();
+
+        refreshTimer =
+            setTimeout(
+                loop,
+                refreshInterval * 1000
+            );
+    }
+
+    refreshTimer =
+        setTimeout(
+            loop,
+            refreshInterval * 1000
+        );
+}
+
+
+/* ============================================================
+   CHANGEMENT INTERVALLE
+   ============================================================ */
+
+function changeRefreshInterval()
+{
+    refreshInterval =
+        getRefreshInterval();
+
+    startRefreshTimer();
+}
+
+
+/* ============================================================
+   CONSIGNES
+   ============================================================ */
+
+const sensorSetpoints = {};
+
+
+function getSensorSetpoint(index)
+{
+    const key =
+        "sensorSetpoint_" +
+        index;
+
+    const stored =
+        localStorage.getItem(key);
+
+    if (stored === null)
+    {
+        return "";
+    }
+
+    return stored;
+}
+
+
+function setSensorSetpoint(index)
+{
+    const input =
+        document.getElementById(
+            "setpoint_" + index
+        );
+
+    if (!input)
+    {
+        return;
+    }
+
+    let value =
+        parseFloat(input.value);
+
+    if (!Number.isFinite(value))
+    {
+        localStorage.removeItem(
+            "sensorSetpoint_" + index
+        );
+
+        return;
+    }
+
+    /*
+     * Limites raisonnables pour éviter
+     * les joyeusetés du genre 384729 °C.
+     */
+
+    if (value < -55)
+    {
+        value = -55;
+    }
+
+    if (value > 125)
+    {
+        value = 125;
+    }
+
+    input.value =
+        value.toFixed(1);
+
+    localStorage.setItem(
+        "sensorSetpoint_" + index,
+        value
+    );
+
+    updateSetpointDisplay(index);
+}
+
+
+function updateSetpointDisplay(index)
+{
+    const input =
+        document.getElementById(
+            "setpoint_" + index
+        );
+
+    if (!input)
+    {
+        return;
+    }
+
+    const value =
+        parseFloat(input.value);
+
+    const display =
+        document.getElementById(
+            "setpointDisplay_" + index
+        );
+
+    if (!display)
+    {
+        return;
+    }
+
+    if (Number.isFinite(value))
+    {
+        display.textContent =
+            value.toFixed(1) +
+            " °C";
+    }
+    else
+    {
+        display.textContent =
+            "Aucune consigne";
+    }
+}
+
+
+function restoreSetpoints()
+{
+    const inputs =
+        document.querySelectorAll(
+            '[id^="setpoint_"]'
+        );
+
+    inputs.forEach(
+        function(input)
+        {
+            const id =
+                input.id;
+
+            const index =
+                parseInt(
+                    id.replace(
+                        "setpoint_",
+                        ""
+                    ),
+                    10
+                );
+
+            if (!Number.isFinite(index))
+            {
+                return;
+            }
+
+            const value =
+                getSensorSetpoint(index);
+
+            if (value !== "")
+            {
+                input.value =
+                    Number(value).toFixed(1);
+            }
+
+            updateSetpointDisplay(index);
+        }
+    );
 }
 
 
@@ -721,27 +561,28 @@ function escapeHTML(value)
    INITIALISATION
    ============================================================ */
 
-function init()
+async function init()
 {
-    loadRefreshInterval();
-
-    updateStatus();
-
-    updateTemperatures();
+    /*
+     * Premier affichage.
+     */
+    await refreshAll();
 
     /*
-       L'état Wi-Fi est rafraîchi
-       indépendamment des températures.
-    */
+     * Restaurer les consignes locales.
+     */
+    restoreSetpoints();
 
-    setInterval(
-        updateStatus,
-        5000
-    );
-
+    /*
+     * Démarrer UNE SEULE boucle.
+     */
     startRefreshTimer();
 }
 
+
+/* ============================================================
+   DOM READY
+   ============================================================ */
 
 if (
     document.readyState ===
