@@ -2,425 +2,726 @@
 #define HTML_H
 
 const char HTML_PAGE[] PROGMEM = R"rawliteral(
-
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <title>3x0c3t S0NDES</title>
 
-<title>3x0c3t S0NDES</title>
-
-<style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    padding: 20px;
-
-    background: #111;
-    color: #eee;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-}
-
-.container {
-    max-width: 900px;
-    margin: auto;
-}
-
-h1 {
-    margin-bottom: 5px;
-}
-
-h2 {
-    margin-top: 0;
-}
-
-.card {
-    background: #1c1c1c;
-
-    border: 1px solid #333;
-
-    border-radius: 10px;
-
-    padding: 15px;
-
-    margin-bottom: 15px;
-}
-
-.status {
-    font-size: 18px;
-}
-
-.ok {
-    color: #55dd77;
-}
-
-.error {
-    color: #ff5555;
-}
-
-button {
-    border: 0;
-
-    border-radius: 6px;
-
-    padding: 12px 16px;
-
-    margin: 4px;
-
-    font-size: 15px;
-
-    cursor: pointer;
-}
-
-button:hover {
-    opacity: 0.8;
-}
-
-.temperature {
-    font-size: 24px;
-
-    padding: 8px 0;
-}
-
-pre {
-    white-space: pre-wrap;
-}
-
-</style>
-
+    <link rel="stylesheet" href="/style.css">
 </head>
-
 
 <body>
 
-<div class="container">
+<div class="app">
 
-<h1>🌡️ 3x0c3t S0NDES</h1>
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
 
-<p>Interface de pilotage ESP8266</p>
+    <header class="header">
+
+        <div class="header-title">
+            <h1>3x0c3t S0NDES</h1>
+            <span class="version">v1.2 DEV</span>
+        </div>
+
+        <div class="connection">
+            <span id="connection-dot" class="status-dot"></span>
+            <span id="connection-status">ESP8266</span>
+        </div>
+
+    </header>
 
 
-<!-- =====================================================
-     ÉTAT
-===================================================== -->
+    <!-- =====================================================
+         CONTENU PRINCIPAL
+         ===================================================== -->
 
-<div class="card">
+    <main class="main">
 
-<h2>État système</h2>
 
-<div id="status">
-    Chargement...
+        <!-- =================================================
+             TEMPÉRATURES
+             ================================================= -->
+
+        <section class="card temperatures-card">
+
+            <div class="card-header">
+                <div>
+                    <span class="card-icon">🌡️</span>
+                    <h2>Températures</h2>
+                </div>
+
+                <span id="temperature-state" class="badge">
+                    ACTIF
+                </span>
+            </div>
+
+
+            <div id="temperatures" class="temperature-grid">
+
+                <!-- S1 -->
+                <article class="sensor">
+
+                    <div class="sensor-header">
+                        <span class="sensor-name">S1</span>
+                        <span class="sensor-state">OK</span>
+                    </div>
+
+                    <div class="sensor-value">
+                        <span id="temp-1">--.--</span>
+                        <span class="unit">°C</span>
+                    </div>
+
+                </article>
+
+
+                <!-- S2 -->
+                <article class="sensor">
+
+                    <div class="sensor-header">
+                        <span class="sensor-name">S2</span>
+                        <span class="sensor-state">OK</span>
+                    </div>
+
+                    <div class="sensor-value">
+                        <span id="temp-2">--.--</span>
+                        <span class="unit">°C</span>
+                    </div>
+
+                </article>
+
+
+                <!-- S3 -->
+                <article class="sensor">
+
+                    <div class="sensor-header">
+                        <span class="sensor-name">S3</span>
+                        <span class="sensor-state">OK</span>
+                    </div>
+
+                    <div class="sensor-value">
+                        <span id="temp-3">--.--</span>
+                        <span class="unit">°C</span>
+                    </div>
+
+                </article>
+
+
+                <!-- S4 -->
+                <article class="sensor">
+
+                    <div class="sensor-header">
+                        <span class="sensor-name">S4</span>
+                        <span class="sensor-state">OK</span>
+                    </div>
+
+                    <div class="sensor-value">
+                        <span id="temp-4">--.--</span>
+                        <span class="unit">°C</span>
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             WIFI
+             ================================================= -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <div>
+                    <span class="card-icon">📡</span>
+                    <h2>Connexion</h2>
+                </div>
+
+                <span id="wifi-status" class="badge badge-ok">
+                    CONNECTÉ
+                </span>
+
+            </div>
+
+
+            <div class="info-grid">
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        SSID
+                    </span>
+
+                    <span
+                        id="wifi-ssid"
+                        class="info-value"
+                    >
+                        --
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Adresse IP
+                    </span>
+
+                    <span
+                        id="wifi-ip"
+                        class="info-value"
+                    >
+                        --
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Signal
+                    </span>
+
+                    <span
+                        id="wifi-rssi"
+                        class="info-value"
+                    >
+                        -- dBm
+                    </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span class="info-label">
+                        Hostname
+                    </span>
+
+                    <span
+                        id="wifi-hostname"
+                        class="info-value"
+                    >
+                        --
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             PILOTAGE
+             ================================================= -->
+
+        <section class="card control-card">
+
+            <div class="card-header">
+
+                <div>
+                    <span class="card-icon">🎛️</span>
+                    <h2>Pilotage</h2>
+                </div>
+
+            </div>
+
+
+            <!-- LED -->
+
+            <div class="control-group">
+
+                <div class="control-label">
+
+                    <span class="control-title">
+                        LED
+                    </span>
+
+                    <span
+                        id="led-state"
+                        class="control-status"
+                    >
+                        ÉTEINTE
+                    </span>
+
+                </div>
+
+
+                <div class="button-group">
+
+                    <button
+                        id="led-on"
+                        class="button button-success"
+                        type="button"
+                    >
+                        ON
+                    </button>
+
+                    <button
+                        id="led-off"
+                        class="button button-secondary"
+                        type="button"
+                    >
+                        OFF
+                    </button>
+
+                    <button
+                        id="led-test"
+                        class="button button-secondary"
+                        type="button"
+                    >
+                        TEST
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BUZZER -->
+
+            <div class="control-group">
+
+                <div class="control-label">
+
+                    <span class="control-title">
+                        Buzzer
+                    </span>
+
+                    <span
+                        id="buzzer-state"
+                        class="control-status"
+                    >
+                        INACTIF
+                    </span>
+
+                </div>
+
+
+                <div class="button-group">
+
+                    <button
+                        id="buzzer-test"
+                        class="button button-warning"
+                        type="button"
+                    >
+                        🔊 TEST
+                    </button>
+
+                    <button
+                        id="buzzer-off"
+                        class="button button-secondary"
+                        type="button"
+                    >
+                        STOP
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CONSIGNES
+             ================================================= -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <div>
+                    <span class="card-icon">🎯</span>
+                    <h2>Consignes</h2>
+                </div>
+
+            </div>
+
+
+            <div class="setpoints">
+
+
+                <!-- CONSIGNE S1 -->
+
+                <div class="setpoint">
+
+                    <label for="setpoint-1">
+                        S1
+                    </label>
+
+                    <div class="input-unit">
+
+                        <input
+                            id="setpoint-1"
+                            type="number"
+                            step="0.1"
+                            value="20.0"
+                        >
+
+                        <span>°C</span>
+
+                    </div>
+
+                    <button
+                        class="button button-primary setpoint-save"
+                        data-sensor="1"
+                        type="button"
+                    >
+                        OK
+                    </button>
+
+                </div>
+
+
+
+                <!-- CONSIGNE S2 -->
+
+                <div class="setpoint">
+
+                    <label for="setpoint-2">
+                        S2
+                    </label>
+
+                    <div class="input-unit">
+
+                        <input
+                            id="setpoint-2"
+                            type="number"
+                            step="0.1"
+                            value="20.0"
+                        >
+
+                        <span>°C</span>
+
+                    </div>
+
+                    <button
+                        class="button button-primary setpoint-save"
+                        data-sensor="2"
+                        type="button"
+                    >
+                        OK
+                    </button>
+
+                </div>
+
+
+
+                <!-- CONSIGNE S3 -->
+
+                <div class="setpoint">
+
+                    <label for="setpoint-3">
+                        S3
+                    </label>
+
+                    <div class="input-unit">
+
+                        <input
+                            id="setpoint-3"
+                            type="number"
+                            step="0.1"
+                            value="20.0"
+                        >
+
+                        <span>°C</span>
+
+                    </div>
+
+                    <button
+                        class="button button-primary setpoint-save"
+                        data-sensor="3"
+                        type="button"
+                    >
+                        OK
+                    </button>
+
+                </div>
+
+
+
+                <!-- CONSIGNE S4 -->
+
+                <div class="setpoint">
+
+                    <label for="setpoint-4">
+                        S4
+                    </label>
+
+                    <div class="input-unit">
+
+                        <input
+                            id="setpoint-4"
+                            type="number"
+                            step="0.1"
+                            value="20.0"
+                        >
+
+                        <span>°C</span>
+
+                    </div>
+
+                    <button
+                        class="button button-primary setpoint-save"
+                        data-sensor="4"
+                        type="button"
+                    >
+                        OK
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ALERTES
+             ================================================= -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <div>
+                    <span class="card-icon">⚠️</span>
+                    <h2>Alertes</h2>
+                </div>
+
+            </div>
+
+
+            <div class="alert-list">
+
+
+                <!-- ALERTE TEMPÉRATURE HAUTE -->
+
+                <div class="alert-row">
+
+                    <div>
+
+                        <span class="alert-title">
+                            Température haute
+                        </span>
+
+                        <span class="alert-description">
+                            Déclenchement au-dessus de la consigne
+                        </span>
+
+                    </div>
+
+
+                    <label class="switch">
+
+                        <input
+                            id="alert-high"
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- ALERTE TEMPÉRATURE BASSE -->
+
+                <div class="alert-row">
+
+                    <div>
+
+                        <span class="alert-title">
+                            Température basse
+                        </span>
+
+                        <span class="alert-description">
+                            Déclenchement sous la consigne
+                        </span>
+
+                    </div>
+
+
+                    <label class="switch">
+
+                        <input
+                            id="alert-low"
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- ALERTE BUZZER -->
+
+                <div class="alert-row">
+
+                    <div>
+
+                        <span class="alert-title">
+                            Alerte sonore
+                        </span>
+
+                        <span class="alert-description">
+                            Utiliser le buzzer en cas d'alerte
+                        </span>
+
+                    </div>
+
+
+                    <label class="switch">
+
+                        <input
+                            id="alert-buzzer"
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- ALERTE LED -->
+
+                <div class="alert-row">
+
+                    <div>
+
+                        <span class="alert-title">
+                            Alerte LED
+                        </span>
+
+                        <span class="alert-description">
+                            Utiliser la LED en cas d'alerte
+                        </span>
+
+                    </div>
+
+
+                    <label class="switch">
+
+                        <input
+                            id="alert-led"
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             SYSTÈME
+             ================================================= -->
+
+        <section class="card system-card">
+
+            <div class="card-header">
+
+                <div>
+                    <span class="card-icon">⚙️</span>
+                    <h2>Système</h2>
+                </div>
+
+            </div>
+
+
+            <div class="system-actions">
+
+                <button
+                    id="refresh"
+                    class="button button-secondary"
+                    type="button"
+                >
+                    🔄 Actualiser
+                </button>
+
+
+                <button
+                    id="reboot"
+                    class="button button-danger"
+                    type="button"
+                >
+                    ⟳ Redémarrer l'ESP
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <footer class="footer">
+
+        <span>
+            3x0c3t S0NDES
+        </span>
+
+        <span>
+            v1.2 DEV
+        </span>
+
+        <span id="last-update">
+            Dernière mise à jour : --
+        </span>
+
+    </footer>
+
 </div>
 
-</div>
 
-
-<!-- =====================================================
-     TEMPÉRATURES
-===================================================== -->
-
-<div class="card">
-
-<h2>🌡️ Températures</h2>
-
-<div id="temperatures">
-    Chargement...
-</div>
-
-</div>
-
-
-<!-- =====================================================
-     LED
-===================================================== -->
-
-<div class="card">
-
-<h2>💡 LEDs</h2>
-
-<button onclick="led('off')">
-    OFF
-</button>
-
-<button onclick="led('green')">
-    Vert
-</button>
-
-<button onclick="led('red')">
-    Rouge
-</button>
-
-<button onclick="led('orange')">
-    Orange
-</button>
-
-<button onclick="led('rainbow')">
-    Rainbow
-</button>
-
-</div>
-
-
-<!-- =====================================================
-     BUZZER
-===================================================== -->
-
-<div class="card">
-
-<h2>🔊 Buzzer</h2>
-
-<button onclick="buzzer('beep')">
-    Bip
-</button>
-
-<button onclick="buzzer('success')">
-    Succès
-</button>
-
-<button onclick="buzzer('startup')">
-    Mélodie
-</button>
-
-</div>
-
-
-<!-- =====================================================
-     REBOOT
-===================================================== -->
-
-<div class="card">
-
-<h2>⚙️ Système</h2>
-
-<button onclick="reboot()">
-    🔄 Redémarrer l'ESP
-</button>
-
-</div>
-
-
-</div>
-
-
-<script>
-
-async function api(url)
-{
-    const response = await fetch(url);
-
-    if (!response.ok)
-        throw new Error("HTTP " + response.status);
-
-    return await response.json();
-}
-
-
-// ========================================================
-// STATUS
-// ========================================================
-
-async function updateStatus()
-{
-    try
-    {
-        const data =
-            await api("/api/status");
-
-        let html = "";
-
-        html +=
-            "<p>WiFi : " +
-            (
-                data.wifi
-                ? '<span class="ok">CONNECTÉ</span>'
-                : '<span class="error">ERREUR</span>'
-            ) +
-            "</p>";
-
-        html +=
-            "<p>SSID : <strong>" +
-            data.ssid +
-            "</strong></p>";
-
-        html +=
-            "<p>IP : <strong>" +
-            data.ip +
-            "</strong></p>";
-
-        html +=
-            "<p>Signal : " +
-            data.rssi +
-            " dBm</p>";
-
-        html +=
-            "<p>Uptime : " +
-            Math.floor(data.uptime / 1000) +
-            " s</p>";
-
-        document.getElementById("status").innerHTML =
-            html;
-    }
-    catch (error)
-    {
-        document.getElementById("status").innerHTML =
-            '<span class="error">ESP inaccessible</span>';
-    }
-}
-
-
-// ========================================================
-// TEMPERATURES
-// ========================================================
-
-async function updateTemperatures()
-{
-    try
-    {
-        const data =
-            await api("/api/temperatures");
-
-        let html = "";
-
-        for (
-            let i = 0;
-            i < data.values.length;
-            i++
-        )
-        {
-            html +=
-                '<div class="temperature">' +
-                "S" +
-                (i + 1) +
-                " : " +
-                data.values[i].toFixed(2) +
-                " °C" +
-                "</div>";
-        }
-
-        document.getElementById(
-            "temperatures"
-        ).innerHTML = html;
-    }
-    catch (error)
-    {
-        document.getElementById(
-            "temperatures"
-        ).innerHTML =
-            '<span class="error">Erreur</span>';
-    }
-}
-
-
-// ========================================================
-// LED
-// ========================================================
-
-async function led(color)
-{
-    try
-    {
-        await api(
-            "/api/led?color=" +
-            encodeURIComponent(color)
-        );
-
-        updateStatus();
-    }
-    catch (error)
-    {
-        alert("Erreur LED");
-    }
-}
-
-
-// ========================================================
-// BUZZER
-// ========================================================
-
-async function buzzer(action)
-{
-    try
-    {
-        await api(
-            "/api/buzzer?action=" +
-            encodeURIComponent(action)
-        );
-    }
-    catch (error)
-    {
-        alert("Erreur buzzer");
-    }
-}
-
-
-// ========================================================
-// REBOOT
-// ========================================================
-
-async function reboot()
-{
-    if (
-        !confirm(
-            "Redémarrer l'ESP8266 ?"
-        )
-    )
-        return;
-
-    try
-    {
-        await api("/api/reboot");
-    }
-    catch (error)
-    {
-        // Normal :
-        // l'ESP vient probablement de redémarrer.
-    }
-
-    document.getElementById(
-        "status"
-    ).innerHTML =
-        "Redémarrage en cours...";
-}
-
-
-// ========================================================
-// RAFRAÎCHISSEMENT
-// ========================================================
-
-updateStatus();
-updateTemperatures();
-
-setInterval(
-    updateStatus,
-    3000
-);
-
-setInterval(
-    updateTemperatures,
-    2000
-);
-
-</script>
+<script src="/script.js"></script>
 
 </body>
-
 </html>
-
 )rawliteral";
 
 #endif
