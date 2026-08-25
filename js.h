@@ -1,109 +1,340 @@
 #ifndef JS_H
 #define JS_H
 
-#include <Arduino.h>
-
 const char JS_PAGE[] PROGMEM = R"rawliteral(
 
-async function api(url)
+/* ============================================================
+   VARIABLES
+   ============================================================ */
+
+let rebooting = false;
+
+let statusBusy = false;
+
+let temperaturesBusy = false;
+
+let lastSensorCount = 0;
+
+
+/* ============================================================
+   API
+   ============================================================ */
+
+async function api(
+    url,
+    timeout = 1500
+)
 {
-    const response = await fetch(url);
+    const controller =
+        new AbortController();
 
-    if (!response.ok)
-    {
-        throw new Error(
-            "HTTP " + response.status
+    const timeoutId =
+        setTimeout(
+            () => controller.abort(),
+            timeout
         );
-    }
 
-    return await response.json();
+    try
+    {
+        const response =
+            await fetch(
+                url,
+                {
+                    method: "GET",
+
+                    cache: "no-store",
+
+                    signal:
+                        controller.signal
+                }
+            );
+
+        if (!response.ok)
+        {
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+        }
+
+        return await response.json();
+    }
+    finally
+    {
+        clearTimeout(timeoutId);
+    }
 }
 
 
-// ============================================================
-// ETAT DU SYSTEME
-// ============================================================
+/* ============================================================
+   ECHAPPEMENT HTML
+   ============================================================ */
+
+function escapeHtml(value)
+{
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+}
+
+
+/* ============================================================
+   STATUS
+   ============================================================ */
 
 async function updateStatus()
 {
-    try
+    if (
+        rebooting ||
+        statusBusy
+    )
     {
-        const data = await api(
-            "/api/status"
-        );
-
-        let html = "";
-
-        html +=
-            "<p>WiFi : " +
-            (
-                data.wifi
-                ? '<span class="ok">CONNECTÉ</span>'
-                : '<span class="error">ERREUR</span>'
-            ) +
-            "</p>";
-
-        html +=
-            "<p>SSID : <strong>" +
-            data.ssid +
-            "</strong></p>";
-
-        html +=
-            "<p>IP : <strong>" +
-            data.ip +
-            "</strong></p>";
-
-        html +=
-            "<p>Signal : " +
-            data.rssi +
-            " dBm</p>";
-
-        html +=
-            "<p>Uptime : " +
-            data.uptime +
-            " s</p>";
-
-        const element =
-            document.getElementById("status");
-
-        if (element)
-        {
-            element.innerHTML = html;
-        }
+        return;
     }
-    catch (error)
-    {
-        console.error(
-            "Erreur état :",
-            error
-        );
 
-        const element =
-            document.getElementById("status");
+    statusBusy = true;
 
-        if (element)
-        {
-            element.innerHTML =
-                '<span class="error">ESP inaccessible</span>';
-        }
-    }
-}
-
-
-// ============================================================
-// TEMPERATURES
-// ============================================================
-
-async function updateTemperatures()
-{
     try
     {
         const data =
             await api(
-                "/api/temperatures"
+                "/api/status",
+                1200
             );
 
-        let html = "";
+        if (rebooting)
+        {
+            return;
+        }
+
+
+        const wifiValue =
+            document.getElementById(
+                "wifiValue"
+            );
+
+        const ssidValue =
+            document.getElementById(
+                "ssidValue"
+            );
+
+        const ipValue =
+            document.getElementById(
+                "ipValue"
+            );
+
+        const rssiValue =
+            document.getElementById(
+                "rssiValue"
+            );
+
+        const uptimeValue =
+            document.getElementById(
+                "uptimeValue"
+            );
+
+        const badge =
+            document.getElementById(
+                "connectionBadge"
+            );
+
+
+        if (wifiValue)
+        {
+            wifiValue.innerHTML =
+                data.wifi
+                ? '<span class="ok">CONNECTÉ</span>'
+                : '<span class="error">ERREUR</span>';
+        }
+
+
+        if (ssidValue)
+        {
+            ssidValue.textContent =
+                data.ssid || "-";
+        }
+
+
+        if (ipValue)
+        {
+            ipValue.textContent =
+                data.ip || "-";
+        }
+
+
+        if (rssiValue)
+        {
+            rssiValue.textContent =
+                Number(data.rssi || 0) +
+                " dBm";
+        }
+
+
+        if (uptimeValue)
+        {
+            uptimeValue.textContent =
+                formatUptime(
+                    Number(
+                        data.uptime || 0
+                    )
+                );
+        }
+
+
+        if (badge)
+        {
+            if (data.wifi)
+            {
+                badge.textContent =
+                    "CONNECTÉ";
+
+                badge.className =
+                    "badge badge-ok";
+            }
+            else
+            {
+                badge.textContent =
+                    "ERREUR";
+
+                badge.className =
+                    "badge badge-error";
+            }
+        }
+    }
+    catch (error)
+    {
+        /*
+         * Silence volontaire.
+         *
+         * L'ESP peut être en train de
+         * redémarrer ou de reconnecter
+         * le WiFi.
+         */
+    }
+    finally
+    {
+        statusBusy = false;
+    }
+}
+
+
+/* ============================================================
+   UPTIME
+   ============================================================ */
+
+function formatUptime(ms)
+{
+    const seconds =
+        Math.floor(
+            ms / 1000
+        );
+
+    const days =
+        Math.floor(
+            seconds / 86400
+        );
+
+    const hours =
+        Math.floor(
+            (seconds % 86400) / 3600
+        );
+
+    const minutes =
+        Math.floor(
+            (seconds % 3600) / 60
+        );
+
+    const secs =
+        seconds % 60;
+
+
+    if (days > 0)
+    {
+        return (
+            days +
+            "j " +
+            hours +
+            "h"
+        );
+    }
+
+
+    if (hours > 0)
+    {
+        return (
+            hours +
+            "h " +
+            minutes +
+            "m"
+        );
+    }
+
+
+    if (minutes > 0)
+    {
+        return (
+            minutes +
+            "m " +
+            secs +
+            "s"
+        );
+    }
+
+
+    return (
+        secs +
+        " s"
+    );
+}
+
+
+/* ============================================================
+   TEMPERATURES
+   ============================================================ */
+
+async function updateTemperatures()
+{
+    if (
+        rebooting ||
+        temperaturesBusy
+    )
+    {
+        return;
+    }
+
+    temperaturesBusy = true;
+
+    try
+    {
+        const data =
+            await api(
+                "/api/temperatures",
+                1200
+            );
+
+        if (rebooting)
+        {
+            return;
+        }
+
 
         if (
             !data ||
@@ -113,121 +344,447 @@ async function updateTemperatures()
         )
         {
             throw new Error(
-                "Format température invalide"
+                "Format températures invalide"
             );
         }
+
+
+        const temperatures =
+            data.temperatures;
+
+
+        lastSensorCount =
+            temperatures.length;
+
+
+        const temperatureElement =
+            document.getElementById(
+                "temperatures"
+            );
+
+
+        const countElement =
+            document.getElementById(
+                "sensorCount"
+            );
+
+
+        if (countElement)
+        {
+            countElement.textContent =
+                temperatures.length +
+                (
+                    temperatures.length > 1
+                    ? " sondes"
+                    : " sonde"
+                );
+        }
+
+
+        if (!temperatureElement)
+        {
+            return;
+        }
+
+
+        let html = "";
+
 
         for (
             let i = 0;
-            i < data.temperatures.length;
+            i < temperatures.length;
             i++
         )
         {
-            html +=
-                '<div class="temperature">' +
-                "S" +
-                (i + 1) +
-                " : " +
+            const value =
                 Number(
-                    data.temperatures[i]
-                ).toFixed(2) +
-                " °C" +
+                    temperatures[i]
+                );
+
+
+            const valid =
+                Number.isFinite(
+                    value
+                );
+
+
+            html +=
+
+                '<div class="sensor">' +
+
+                    '<div class="sensor-header">' +
+
+                        '<span class="sensor-name">' +
+
+                            "SONDE " +
+
+                            (i + 1) +
+
+                        "</span>" +
+
+                        '<span class="sensor-state">' +
+
+                            (
+                                valid
+                                ? "OK"
+                                : "ERREUR"
+                            ) +
+
+                        "</span>" +
+
+                    "</div>" +
+
+                    '<div class="sensor-value">' +
+
+                        (
+                            valid
+                            ? value.toFixed(2)
+                            : "--"
+                        ) +
+
+                        '<span class="sensor-unit">' +
+                            "°C" +
+                        "</span>" +
+
+                    "</div>" +
+
                 "</div>";
         }
 
-        const element =
-            document.getElementById(
-                "temperatures"
-            );
 
-        if (element)
+        if (
+            temperatures.length === 0
+        )
         {
-            element.innerHTML = html;
+            html =
+                '<div class="loading">' +
+                    "Aucune sonde détectée" +
+                "</div>";
         }
+
+
+        temperatureElement.innerHTML =
+            html;
+
+
+        updateSetpoints(
+            temperatures.length
+        );
     }
     catch (error)
     {
-        console.error(
-            "Erreur températures :",
-            error
-        );
-
-        const element =
-            document.getElementById(
-                "temperatures"
-            );
-
-        if (element)
-        {
-            element.innerHTML =
-                '<span class="error">Erreur température</span>';
-        }
+        /*
+         * Pas d'erreur console.
+         *
+         * Une perte réseau temporaire
+         * n'est pas une panne logicielle.
+         */
+    }
+    finally
+    {
+        temperaturesBusy = false;
     }
 }
 
 
-// ============================================================
-// LED
-// ============================================================
+/* ============================================================
+   CONSIGNES
+   ============================================================ */
+
+function updateSetpoints(count)
+{
+    const element =
+        document.getElementById(
+            "setpoints"
+        );
+
+    if (!element)
+    {
+        return;
+    }
+
+
+    if (count <= 0)
+    {
+        element.innerHTML =
+            '<div class="loading">' +
+                "Aucune sonde" +
+            "</div>";
+
+        return;
+    }
+
+
+    /*
+     * Ne reconstruit pas inutilement
+     * l'interface si le nombre de sondes
+     * n'a pas changé.
+     */
+
+    const existing =
+        element.children.length;
+
+
+    if (
+        existing === count
+    )
+    {
+        return;
+    }
+
+
+    let html = "";
+
+
+    for (
+        let i = 0;
+        i < count;
+        i++
+    )
+    {
+        const key =
+            "setpoint_" +
+            i;
+
+
+        const saved =
+            localStorage.getItem(
+                key
+            );
+
+
+        const value =
+            saved !== null
+            ? saved
+            : "25.00";
+
+
+        html +=
+
+            '<div class="setpoint">' +
+
+                '<span class="setpoint-name">' +
+
+                    "S" +
+
+                    (i + 1) +
+
+                "</span>" +
+
+                '<input ' +
+
+                    'type="number" ' +
+
+                    'step="0.1" ' +
+
+                    'min="-55" ' +
+
+                    'max="125" ' +
+
+                    'value="' +
+
+                    value +
+
+                    '" ' +
+
+                    'id="setpoint_' +
+
+                    i +
+
+                    '" ' +
+
+                    'onchange="saveSetpoint(' +
+
+                    i +
+
+                    ')" ' +
+
+                '>' +
+
+                '<span class="setpoint-unit">' +
+
+                    "°C" +
+
+                "</span>" +
+
+            "</div>";
+    }
+
+
+    element.innerHTML =
+        html;
+
+
+    /*
+     * Note :
+     *
+     * Pour l'instant les consignes
+     * sont conservées dans le navigateur.
+     *
+     * Une API ESP dédiée pourra ensuite
+     * les envoyer réellement à l'ESP8266.
+     */
+
+    const note =
+        document.createElement(
+            "div"
+        );
+
+    note.className =
+        "setpoint-note";
+
+    note.textContent =
+        "Consignes locales du navigateur";
+
+    element.appendChild(
+        note
+    );
+}
+
+
+/* ============================================================
+   SAUVEGARDE CONSIGNE
+   ============================================================ */
+
+function saveSetpoint(index)
+{
+    const input =
+        document.getElementById(
+            "setpoint_" +
+            index
+        );
+
+    if (!input)
+    {
+        return;
+    }
+
+
+    localStorage.setItem(
+        "setpoint_" + index,
+        input.value
+    );
+}
+
+
+/* ============================================================
+   LED
+   ============================================================ */
 
 async function led(color)
 {
+    if (rebooting)
+    {
+        return;
+    }
+
+
+    const status =
+        document.getElementById(
+            "ledStatus"
+        );
+
+
+    if (status)
+    {
+        status.textContent =
+            "Commande...";
+    }
+
+
     try
     {
         await api(
             "/api/led?color=" +
-            encodeURIComponent(color)
+            encodeURIComponent(
+                color
+            ),
+            1500
         );
 
-        updateStatus();
+
+        if (status)
+        {
+            status.textContent =
+                color.toUpperCase();
+        }
     }
     catch (error)
     {
-        console.error(
-            "Erreur LED :",
-            error
-        );
-
-        alert(
-            "Erreur LED"
-        );
+        if (status)
+        {
+            status.textContent =
+                "Indisponible";
+        }
     }
 }
 
 
-// ============================================================
-// BUZZER
-// ============================================================
+/* ============================================================
+   BUZZER
+   ============================================================ */
 
 async function buzzer(action)
 {
+    if (rebooting)
+    {
+        return;
+    }
+
+
+    const status =
+        document.getElementById(
+            "buzzerStatus"
+        );
+
+
+    if (status)
+    {
+        status.textContent =
+            "Commande...";
+    }
+
+
     try
     {
         await api(
             "/api/buzzer?action=" +
-            encodeURIComponent(action)
+            encodeURIComponent(
+                action
+            ),
+            1500
         );
+
+
+        if (status)
+        {
+            status.textContent =
+                "OK";
+        }
     }
     catch (error)
     {
-        console.error(
-            "Erreur buzzer :",
-            error
-        );
-
-        alert(
-            "Erreur buzzer"
-        );
+        if (status)
+        {
+            status.textContent =
+                "Indisponible";
+        }
     }
 }
 
 
-// ============================================================
-// REBOOT
-// ============================================================
+/* ============================================================
+   REBOOT
+   ============================================================ */
 
-async function reboot()
+function rebootESP()
 {
+    if (rebooting)
+    {
+        return;
+    }
+
+
     if (
         !confirm(
             "Redémarrer l'ESP8266 ?"
@@ -237,64 +794,289 @@ async function reboot()
         return;
     }
 
-    const element =
+
+    /*
+     * BLOQUER immédiatement
+     * les mises à jour périodiques.
+     */
+
+    rebooting = true;
+
+
+    const status =
         document.getElementById(
             "status"
         );
 
-    if (element)
+
+    const badge =
+        document.getElementById(
+            "connectionBadge"
+        );
+
+
+    const button =
+        document.getElementById(
+            "rebootButton"
+        );
+
+
+    if (status)
     {
-        element.innerHTML =
-            '<span class="warning">Redémarrage en cours...</span>';
+        status.innerHTML =
+            '<div class="status-item">' +
+                '<strong class="warning">' +
+                    "REDÉMARRAGE..." +
+                "</strong>" +
+            "</div>";
     }
 
-    try
+
+    if (badge)
     {
-        await api(
-            "/api/reboot"
-        );
+        badge.textContent =
+            "REBOOT";
+
+        badge.className =
+            "badge badge-warning";
     }
-    catch (error)
+
+
+    if (button)
     {
-        console.log(
-            "Connexion interrompue pendant le reboot."
-        );
+        button.disabled =
+            true;
+
+        button.textContent =
+            "⏳ Redémarrage...";
     }
+
+
+    /*
+     * Ne surtout pas await.
+     *
+     * L'ESP peut couper la connexion
+     * avant de retourner sa réponse.
+     */
+
+    fetch(
+        "/api/reboot",
+        {
+            method: "GET",
+
+            cache: "no-store",
+
+            keepalive: false
+        }
+    )
+    .catch(
+        () =>
+        {
+            /*
+             * Réponse perdue = normal.
+             */
+        }
+    );
+
+
+    /*
+     * Laisse le temps à l'ESP
+     * de redémarrer.
+     */
+
+    setTimeout(
+        waitForESP,
+        6000
+    );
 }
 
 
-// ============================================================
-// COMPATIBILITE HTML
-// ============================================================
+/* ============================================================
+   ATTENTE RETOUR ESP
+   ============================================================ */
 
-function rebootESP()
+async function waitForESP()
 {
-    reboot();
+    let attempts = 0;
+
+    const maxAttempts = 20;
+
+
+    async function check()
+    {
+        attempts++;
+
+
+        try
+        {
+            const data =
+                await api(
+                    "/api/status",
+                    1200
+                );
+
+
+            if (
+                data &&
+                data.wifi === true
+            )
+            {
+                /*
+                 * ESP revenu.
+                 */
+
+                rebooting = false;
+
+
+                const button =
+                    document.getElementById(
+                        "rebootButton"
+                    );
+
+
+                if (button)
+                {
+                    button.disabled =
+                        false;
+
+                    button.textContent =
+                        "🔄 Redémarrer l'ESP8266";
+                }
+
+
+                updateStatus();
+
+                updateTemperatures();
+
+                return;
+            }
+        }
+        catch (error)
+        {
+            /*
+             * ESP encore indisponible.
+             */
+        }
+
+
+        if (
+            attempts < maxAttempts
+        )
+        {
+            setTimeout(
+                check,
+                1000
+            );
+        }
+        else
+        {
+            /*
+             * On rend la main au système
+             * normal de rafraîchissement.
+             */
+
+            rebooting = false;
+
+
+            const button =
+                document.getElementById(
+                    "rebootButton"
+                );
+
+
+            if (button)
+            {
+                button.disabled =
+                    false;
+
+                button.textContent =
+                    "🔄 Redémarrer l'ESP8266";
+            }
+
+
+            updateStatus();
+
+            updateTemperatures();
+        }
+    }
+
+
+    check();
 }
 
 
-// ============================================================
-// INITIALISATION
-// ============================================================
+/* ============================================================
+   COMPATIBILITE
+   ============================================================ */
 
-updateStatus();
+function reboot()
+{
+    rebootESP();
+}
 
-updateTemperatures();
+
+/* ============================================================
+   INITIALISATION
+   ============================================================ */
+
+function initWebInterface()
+{
+    updateStatus();
+
+    updateTemperatures();
+}
 
 
-// ============================================================
-// RAFRAICHISSEMENT
-// ============================================================
+/* ============================================================
+   RAFRAICHISSEMENT STATUS
+   ============================================================ */
 
 setInterval(
-    updateStatus,
+    function()
+    {
+        if (!rebooting)
+        {
+            updateStatus();
+        }
+    },
     3000
 );
 
+
+/* ============================================================
+   RAFRAICHISSEMENT TEMPERATURES
+   ============================================================ */
+
 setInterval(
-    updateTemperatures,
-    2000
+    function()
+    {
+        if (!rebooting)
+        {
+            updateTemperatures();
+        }
+    },
+    2500
 );
+
+
+/* ============================================================
+   DEMARRAGE
+   ============================================================ */
+
+if (
+    document.readyState ===
+    "loading"
+)
+{
+    document.addEventListener(
+        "DOMContentLoaded",
+        initWebInterface
+    );
+}
+else
+{
+    initWebInterface();
+}
 
 )rawliteral";
 

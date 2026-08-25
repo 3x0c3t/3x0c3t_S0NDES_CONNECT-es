@@ -8,42 +8,61 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="UTF-8">
 
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 >
 
-<meta name="theme-color" content="#101318">
+<meta
+    name="theme-color"
+    content="#111827"
+>
 
-<title>FRIGO | 3x0c3t</title>
+<title>3x0c3t S0NDES</title>
 
-<link rel="stylesheet" href="/style.css">
+<link
+    rel="stylesheet"
+    href="/style.css?v=12"
+>
 
 </head>
+
 
 <body>
 
 <div class="app">
 
-    <!-- HEADER -->
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
 
     <header class="header">
 
-        <div class="brand">
+        <div class="header-main">
 
-            <div class="brand-title">
-                🌡️ FRIGO
+            <div>
+
+                <h1>
+                    🌡️ 3x0c3t S0NDES
+                </h1>
+
+                <div class="subtitle">
+                    ESP8266 · Surveillance & pilotage
+                </div>
+
             </div>
 
-            <div class="brand-subtitle">
-                3x0c3t · ESP8266
+            <div class="version">
+                v1.2
             </div>
 
         </div>
 
-        <nav class="links">
+
+        <div class="header-links">
 
             <a
                 href="https://3x0c3t.com"
@@ -53,6 +72,8 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
                 3x0c3t.com
             </a>
 
+            <span>·</span>
+
             <a
                 href="https://github.com/3x0c3t/3x0c3t_S0NDES_CONNECT-es"
                 target="_blank"
@@ -61,176 +82,351 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
                 GitHub
             </a>
 
-        </nav>
+        </div>
 
     </header>
 
 
-    <!-- ETAT WIFI + REBOOT -->
 
-    <section class="system-grid">
+    <!-- =====================================================
+         CONTENU PRINCIPAL
+         ===================================================== -->
 
-        <div class="panel status-panel">
+    <main class="main">
 
-            <div class="panel-title">
-                📡 État Wi-Fi
+
+        <!-- =================================================
+             ETAT + REBOOT
+             ================================================= -->
+
+        <section class="card status-card">
+
+            <div class="card-title">
+
+                <div>
+                    <span class="icon">📡</span>
+                    <span>État système</span>
+                </div>
+
+                <span
+                    id="connectionBadge"
+                    class="badge badge-ok"
+                >
+                    CONNECTÉ
+                </span>
+
             </div>
+
 
             <div
                 id="status"
-                class="status-content"
+                class="status-grid"
             >
-                Connexion...
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        WiFi
+                    </span>
+
+                    <strong id="wifiValue">
+                        ...
+                    </strong>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        SSID
+                    </span>
+
+                    <strong id="ssidValue">
+                        ...
+                    </strong>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        IP
+                    </span>
+
+                    <strong id="ipValue">
+                        ...
+                    </strong>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        Signal
+                    </span>
+
+                    <strong id="rssiValue">
+                        ...
+                    </strong>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        Uptime
+                    </span>
+
+                    <strong id="uptimeValue">
+                        ...
+                    </strong>
+
+                </div>
+
             </div>
 
-        </div>
 
+            <div class="system-action">
 
-        <div class="panel reboot-panel">
+                <button
+                    class="button button-danger"
+                    id="rebootButton"
+                    onclick="rebootESP()"
+                >
+                    🔄 Redémarrer l'ESP8266
+                </button>
 
-            <div class="panel-title">
-                ⚙️ Système
             </div>
 
-            <button
-                class="button button-danger"
-                onclick="rebootESP()"
+        </section>
+
+
+
+        <!-- =================================================
+             TEMPERATURES
+             ================================================= -->
+
+        <section class="card temperature-card">
+
+            <div class="card-title">
+
+                <div>
+                    <span class="icon">🌡️</span>
+                    <span>Températures</span>
+                </div>
+
+                <span
+                    id="sensorCount"
+                    class="badge"
+                >
+                    0 sondes
+                </span>
+
+            </div>
+
+
+            <div
+                id="temperatures"
+                class="temperature-grid"
             >
-                🔄 Reboot ESP8266
-            </button>
 
-        </div>
-
-    </section>
-
-
-    <!-- PILOTAGE -->
-
-    <section class="panel control-panel">
-
-        <div class="panel-title">
-            🎛️ Pilotage
-        </div>
-
-        <div class="control-groups">
-
-            <div class="control-group">
-
-                <div class="control-label">
-                    💡 LEDs
+                <div class="loading">
+                    Chargement...
                 </div>
 
-                <div class="button-row">
+            </div>
 
-                    <button
-                        class="button button-blue"
-                        onclick="led('blue')"
-                    >
-                        🔵 Bleu
-                    </button>
+        </section>
 
-                    <button
-                        class="button button-green"
-                        onclick="led('green')"
-                    >
-                        🟢 Vert
-                    </button>
 
-                    <button
-                        class="button button-red"
-                        onclick="led('red')"
-                    >
-                        🔴 Rouge
-                    </button>
 
-                    <button
-                        class="button button-orange"
-                        onclick="led('orange')"
-                    >
-                        🟠 Orange
-                    </button>
+        <!-- =================================================
+             PILOTAGE
+             ================================================= -->
 
-                    <button
-                        class="button"
-                        onclick="led('off')"
-                    >
-                        ⚫ OFF
-                    </button>
+        <section class="card control-card">
 
+            <div class="card-title">
+
+                <div>
+                    <span class="icon">🎛️</span>
+                    <span>Pilotage</span>
                 </div>
 
             </div>
 
 
-            <div class="control-group">
+            <div class="control-grid">
 
-                <div class="control-label">
-                    🔊 Buzzer
+
+                <!-- LEDs -->
+
+                <div class="control-block">
+
+                    <div class="control-header">
+
+                        <span>
+                            💡 LEDs
+                        </span>
+
+                        <span
+                            id="ledStatus"
+                            class="control-state"
+                        >
+                            Prêt
+                        </span>
+
+                    </div>
+
+
+                    <div class="button-grid">
+
+                        <button
+                            class="button button-secondary"
+                            onclick="led('off')"
+                        >
+                            OFF
+                        </button>
+
+                        <button
+                            class="button button-success"
+                            onclick="led('green')"
+                        >
+                            Vert
+                        </button>
+
+                        <button
+                            class="button button-danger"
+                            onclick="led('red')"
+                        >
+                            Rouge
+                        </button>
+
+                        <button
+                            class="button button-warning"
+                            onclick="led('orange')"
+                        >
+                            Orange
+                        </button>
+
+                        <button
+                            class="button button-primary"
+                            onclick="led('rainbow')"
+                        >
+                            Rainbow
+                        </button>
+
+                    </div>
+
                 </div>
 
-                <div class="button-row">
 
-                    <button
-                        class="button"
-                        onclick="buzzer('beep')"
-                    >
-                        🔔 Test
-                    </button>
 
-                    <button
-                        class="button"
-                        onclick="buzzer('success')"
-                    >
-                        ✅ Succès
-                    </button>
+                <!-- BUZZER -->
 
-                    <button
-                        class="button"
-                        onclick="buzzer('wifi')"
-                    >
-                        📡 Wi-Fi
-                    </button>
+                <div class="control-block">
 
-                    <button
-                        class="button"
-                        onclick="buzzer('error')"
-                    >
-                        ⚠️ Erreur
-                    </button>
+                    <div class="control-header">
+
+                        <span>
+                            🔊 Buzzer
+                        </span>
+
+                        <span
+                            id="buzzerStatus"
+                            class="control-state"
+                        >
+                            Prêt
+                        </span>
+
+                    </div>
+
+
+                    <div class="button-grid">
+
+                        <button
+                            class="button button-secondary"
+                            onclick="buzzer('beep')"
+                        >
+                            Bip
+                        </button>
+
+                        <button
+                            class="button button-success"
+                            onclick="buzzer('success')"
+                        >
+                            Succès
+                        </button>
+
+                        <button
+                            class="button button-primary"
+                            onclick="buzzer('startup')"
+                        >
+                            Mélodie
+                        </button>
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </div>
-
-    </section>
+        </section>
 
 
-    <!-- SONDES -->
 
-    <section class="panel sensors-panel">
+        <!-- =================================================
+             CONSIGNES
+             ================================================= -->
 
-        <div class="panel-title">
-            🌡️ Sondes & consignes
-        </div>
+        <section class="card setpoint-card">
 
-        <div
-            id="temperatures"
-            class="sensor-grid"
-        >
-            Chargement des sondes...
-        </div>
+            <div class="card-title">
 
-    </section>
+                <div>
+                    <span class="icon">🎯</span>
+                    <span>Consignes</span>
+                </div>
+
+                <span class="badge">
+                    LOCAL
+                </span>
+
+            </div>
 
 
-    <!-- FOOTER -->
+            <div
+                id="setpoints"
+                class="setpoint-grid"
+            >
+
+                <!-- Généré par JavaScript -->
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
 
     <footer class="footer">
 
         <span>
-            3x0c3t_S0NDES_CONNECT-es
+            3x0c3t S0NDES
+        </span>
+
+        <span>
+            ESP8266
         </span>
 
         <span>
@@ -239,10 +435,15 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
     </footer>
 
+
 </div>
 
 
-<script src="/script.js"></script>
+<script
+    src="/script.js?v=12"
+    defer
+></script>
+
 
 </body>
 
