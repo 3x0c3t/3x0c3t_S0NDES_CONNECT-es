@@ -27,13 +27,15 @@ void wifiInit()
     uint8_t timeout = 0;
 
 
-    while (
+    while(
         WiFi.status() != WL_CONNECTED &&
         timeout < WIFI_TIMEOUT
     )
     {
         delay(500);
+
         Serial.print(".");
+
         timeout++;
     }
 
@@ -41,17 +43,33 @@ void wifiInit()
     Serial.println();
 
 
-    if (WiFi.status() == WL_CONNECTED)
+    if(WiFi.status() == WL_CONNECTED)
     {
         Serial.println("WiFi OK");
 
 
+        String ssid = WiFi.SSID();
+
         String ip = WiFi.localIP().toString();
 
+
+        Serial.print("SSID : ");
+        Serial.println(ssid);
+
+        Serial.print("IP   : ");
+        Serial.println(ip);
+
+
         bootWifiStatus(true);
+
         bootIpAddress(ip.c_str());
 
-        wifiScreen(true, ip);
+
+        wifiScreen(
+            true,
+            ssid,
+            ip
+        );
 
 
         // ==========================================
@@ -61,7 +79,6 @@ void wifiInit()
         wifiSuccessBeep();
 
         ledsGreenBlink3();
-
     }
     else
     {
@@ -70,7 +87,12 @@ void wifiInit()
 
         bootWifiStatus(false);
 
-        wifiScreen(false, "");
+
+        wifiScreen(
+            false,
+            "",
+            ""
+        );
 
 
         // ==========================================
