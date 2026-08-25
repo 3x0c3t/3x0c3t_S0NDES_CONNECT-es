@@ -9,6 +9,7 @@
 #include "js.h"
 
 #include "settings.h"
+
 #include "temperature.h"
 #include "leds.h"
 #include "buzzer.h"
@@ -27,7 +28,7 @@ ESP8266WebServer server(80);
 
 void handleRoot()
 {
-    server.send(
+    server.send_P(
         200,
         "text/html",
         HTML_PAGE
@@ -41,7 +42,7 @@ void handleRoot()
 
 void handleCSS()
 {
-    server.send(
+    server.send_P(
         200,
         "text/css",
         cssStyle
@@ -55,7 +56,7 @@ void handleCSS()
 
 void handleJS()
 {
-    server.send(
+    server.send_P(
         200,
         "application/javascript",
         JS_PAGE
@@ -71,39 +72,23 @@ void handleStatus()
 {
     String json = "{";
 
-    // --------------------------------------------------------
-    // WiFi
-    // --------------------------------------------------------
-
     json += "\"wifi\":";
-    json += (WiFi.status() == WL_CONNECTED ? "true" : "false");
-
-    // --------------------------------------------------------
-    // SSID
-    // --------------------------------------------------------
+    json += (
+        WiFi.status() == WL_CONNECTED
+        ? "true"
+        : "false"
+    );
 
     json += ",\"ssid\":\"";
     json += WiFi.SSID();
     json += "\"";
 
-    // --------------------------------------------------------
-    // IP
-    // --------------------------------------------------------
-
     json += ",\"ip\":\"";
     json += WiFi.localIP().toString();
     json += "\"";
 
-    // --------------------------------------------------------
-    // RSSI
-    // --------------------------------------------------------
-
     json += ",\"rssi\":";
     json += String(WiFi.RSSI());
-
-    // --------------------------------------------------------
-    // UPTIME
-    // --------------------------------------------------------
 
     json += ",\"uptime\":";
     json += String(millis() / 1000);
@@ -165,7 +150,7 @@ void handleLED()
         server.send(
             400,
             "application/json",
-            "{\"error\":\"missing color\"}"
+            "{\"ok\":false,\"error\":\"missing color\"}"
         );
 
         return;
@@ -173,115 +158,36 @@ void handleLED()
 
     String color = server.arg("color");
 
-    color.toLowerCase();
-
-    // --------------------------------------------------------
-    // OFF
-    // --------------------------------------------------------
-
-    if (color == "off")
+    if (color == "red")
     {
-        ledsOff();
+        digitalWrite(LED_RED, HIGH);
+        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_BLUE, LOW);
     }
-
-    // --------------------------------------------------------
-    // RED
-    // --------------------------------------------------------
-
-    else if (color == "red")
-    {
-        analogWrite(
-            LED_RED,
-            255
-        );
-
-        analogWrite(
-            LED_GREEN,
-            0
-        );
-
-        analogWrite(
-            LED_BLUE,
-            0
-        );
-    }
-
-    // --------------------------------------------------------
-    // GREEN
-    // --------------------------------------------------------
-
     else if (color == "green")
     {
-        analogWrite(
-            LED_RED,
-            0
-        );
-
-        analogWrite(
-            LED_GREEN,
-            255
-        );
-
-        analogWrite(
-            LED_BLUE,
-            0
-        );
+        digitalWrite(LED_RED, LOW);
+        digitalWrite(LED_GREEN, HIGH);
+        digitalWrite(LED_BLUE, LOW);
     }
-
-    // --------------------------------------------------------
-    // BLUE
-    // --------------------------------------------------------
-
     else if (color == "blue")
     {
-        analogWrite(
-            LED_RED,
-            0
-        );
-
-        analogWrite(
-            LED_GREEN,
-            0
-        );
-
-        analogWrite(
-            LED_BLUE,
-            255
-        );
+        digitalWrite(LED_RED, LOW);
+        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_BLUE, HIGH);
     }
-
-    // --------------------------------------------------------
-    // ORANGE
-    // --------------------------------------------------------
-
-    else if (color == "orange")
+    else if (color == "off")
     {
-        analogWrite(
-            LED_RED,
-            255
-        );
-
-        analogWrite(
-            LED_GREEN,
-            127
-        );
-
-        analogWrite(
-            LED_BLUE,
-            0
-        );
+        digitalWrite(LED_RED, LOW);
+        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_BLUE, LOW);
     }
-
-    // --------------------------------------------------------
-    // UNKNOWN COLOR
-    // --------------------------------------------------------
-
     else
     {
         server.send(
             400,
             "application/json",
-            "{\"error\":\"unknown color\"}"
+            "{\"ok\":false,\"error\":\"invalid color\"}"
         );
 
         return;
@@ -306,7 +212,7 @@ void handleBuzzer()
         server.send(
             400,
             "application/json",
-            "{\"error\":\"missing action\"}"
+            "{\"ok\":false,\"error\":\"missing action\"}"
         );
 
         return;
@@ -314,57 +220,26 @@ void handleBuzzer()
 
     String action = server.arg("action");
 
-    action.toLowerCase();
-
-    // --------------------------------------------------------
-    // TEST
-    // --------------------------------------------------------
-
-    if (action == "beep")
+    if (action == "on")
     {
-        beep(
-            1200,
-            150
-        );
+        digitalWrite(BUZZER_PIN, HIGH);
     }
-
-    // --------------------------------------------------------
-    // SUCCESS
-    // --------------------------------------------------------
-
-    else if (action == "success")
+    else if (action == "off")
     {
-        successBeep();
+        digitalWrite(BUZZER_PIN, LOW);
     }
-
-    // --------------------------------------------------------
-    // WIFI SUCCESS
-    // --------------------------------------------------------
-
-    else if (action == "wifi-success")
+    else if (action == "beep")
     {
-        wifiSuccessBeep();
+        digitalWrite(BUZZER_PIN, HIGH);
+        delay(150);
+        digitalWrite(BUZZER_PIN, LOW);
     }
-
-    // --------------------------------------------------------
-    // WIFI FAILURE
-    // --------------------------------------------------------
-
-    else if (action == "wifi-failure")
-    {
-        wifiFailureBeep();
-    }
-
-    // --------------------------------------------------------
-    // UNKNOWN ACTION
-    // --------------------------------------------------------
-
     else
     {
         server.send(
             400,
             "application/json",
-            "{\"error\":\"unknown action\"}"
+            "{\"ok\":false,\"error\":\"invalid action\"}"
         );
 
         return;
@@ -397,15 +272,25 @@ void handleReboot()
 
 
 // ============================================================
-// INITIALISATION SERVEUR
+// NOT FOUND
+// ============================================================
+
+void handleNotFound()
+{
+    server.send(
+        404,
+        "text/plain",
+        "Not found: " + server.uri()
+    );
+}
+
+
+// ============================================================
+// INITIALISATION
 // ============================================================
 
 void webserverInit()
 {
-    // --------------------------------------------------------
-    // Pages
-    // --------------------------------------------------------
-
     server.on(
         "/",
         HTTP_GET,
@@ -426,7 +311,7 @@ void webserverInit()
 
 
     // --------------------------------------------------------
-    // API
+    // API STATUS
     // --------------------------------------------------------
 
     server.on(
@@ -435,11 +320,21 @@ void webserverInit()
         handleStatus
     );
 
+
+    // --------------------------------------------------------
+    // API TEMPERATURES
+    // --------------------------------------------------------
+
     server.on(
         "/api/temperatures",
         HTTP_GET,
         handleTemperatures
     );
+
+
+    // --------------------------------------------------------
+    // API LED
+    // --------------------------------------------------------
 
     server.on(
         "/api/led",
@@ -447,11 +342,21 @@ void webserverInit()
         handleLED
     );
 
+
+    // --------------------------------------------------------
+    // API BUZZER
+    // --------------------------------------------------------
+
     server.on(
         "/api/buzzer",
         HTTP_GET,
         handleBuzzer
     );
+
+
+    // --------------------------------------------------------
+    // API REBOOT
+    // --------------------------------------------------------
 
     server.on(
         "/api/reboot",
@@ -465,14 +370,7 @@ void webserverInit()
     // --------------------------------------------------------
 
     server.onNotFound(
-        []()
-        {
-            server.send(
-                404,
-                "text/plain",
-                "Not found: " + server.uri()
-            );
-        }
+        handleNotFound
     );
 
 
@@ -489,7 +387,7 @@ void webserverInit()
 
 
 // ============================================================
-// BOUCLE SERVEUR
+// BOUCLE
 // ============================================================
 
 void webserverLoop()

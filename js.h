@@ -1,16 +1,13 @@
 #ifndef JS_H
 #define JS_H
 
+#include <Arduino.h>
+
 const char JS_PAGE[] PROGMEM = R"rawliteral(
 
 async function api(url)
 {
-    const response = await fetch(
-        url,
-        {
-            cache: "no-store"
-        }
-    );
+    const response = await fetch(url);
 
     if (!response.ok)
     {
@@ -48,40 +45,26 @@ async function updateStatus()
 
         html +=
             "<p>SSID : <strong>" +
-            (
-                data.ssid || "-"
-            ) +
+            data.ssid +
             "</strong></p>";
 
         html +=
             "<p>IP : <strong>" +
-            (
-                data.ip || "-"
-            ) +
+            data.ip +
             "</strong></p>";
 
         html +=
             "<p>Signal : " +
-            (
-                data.rssi !== undefined
-                ? data.rssi + " dBm"
-                : "-"
-            ) +
-            "</p>";
+            data.rssi +
+            " dBm</p>";
 
         html +=
             "<p>Uptime : " +
-            (
-                data.uptime !== undefined
-                ? Math.floor(data.uptime) + " s"
-                : "-"
-            ) +
-            "</p>";
+            data.uptime +
+            " s</p>";
 
         const element =
-            document.getElementById(
-                "status"
-            );
+            document.getElementById("status");
 
         if (element)
         {
@@ -96,9 +79,7 @@ async function updateStatus()
         );
 
         const element =
-            document.getElementById(
-                "status"
-            );
+            document.getElementById("status");
 
         if (element)
         {
@@ -117,19 +98,18 @@ async function updateTemperatures()
 {
     try
     {
-        const data = await api(
-            "/api/temperatures"
-        );
+        const data =
+            await api(
+                "/api/temperatures"
+            );
 
         let html = "";
 
-        // ----------------------------------------------------
-        // Vérification des données reçues
-        // ----------------------------------------------------
-
         if (
             !data ||
-            !Array.isArray(data.temperatures)
+            !Array.isArray(
+                data.temperatures
+            )
         )
         {
             throw new Error(
@@ -137,45 +117,22 @@ async function updateTemperatures()
             );
         }
 
-        // ----------------------------------------------------
-        // Affichage
-        // ----------------------------------------------------
-
         for (
             let i = 0;
             i < data.temperatures.length;
             i++
         )
         {
-            const value =
-                Number(
-                    data.temperatures[i]
-                );
-
             html +=
                 '<div class="temperature">' +
-                "<strong>S" +
+                "S" +
                 (i + 1) +
-                "</strong> : " +
-                (
-                    Number.isFinite(value)
-                    ? value.toFixed(2)
-                    : "--"
-                ) +
+                " : " +
+                Number(
+                    data.temperatures[i]
+                ).toFixed(2) +
                 " °C" +
                 "</div>";
-        }
-
-        // ----------------------------------------------------
-        // Aucun capteur
-        // ----------------------------------------------------
-
-        if (
-            data.temperatures.length === 0
-        )
-        {
-            html =
-                '<div class="warning">Aucune sonde</div>';
         }
 
         const element =
@@ -271,12 +228,19 @@ async function buzzer(action)
 
 async function reboot()
 {
-    if (!confirm("Redémarrer l'ESP8266 ?"))
+    if (
+        !confirm(
+            "Redémarrer l'ESP8266 ?"
+        )
+    )
     {
         return;
     }
 
-    const element = document.getElementById("status");
+    const element =
+        document.getElementById(
+            "status"
+        );
 
     if (element)
     {
@@ -286,83 +250,26 @@ async function reboot()
 
     try
     {
-        await api("/api/reboot");
+        await api(
+            "/api/reboot"
+        );
     }
     catch (error)
     {
-        // Normal :
-        // l'ESP peut avoir redémarré avant la réponse HTTP.
-        console.log("ESP redémarré ou connexion interrompue.");
+        console.log(
+            "Connexion interrompue pendant le reboot."
+        );
     }
 }
 
 
 // ============================================================
-// COMPATIBILITÉ AVEC LE BOUTON HTML
+// COMPATIBILITE HTML
 // ============================================================
 
 function rebootESP()
 {
     reboot();
-}
-
-
-    // --------------------------------------------------------
-    // Arrêt des timers
-    // --------------------------------------------------------
-
-    if (window.statusTimer)
-    {
-        clearInterval(
-            window.statusTimer
-        );
-
-        window.statusTimer = null;
-    }
-
-    if (window.temperatureTimer)
-    {
-        clearInterval(
-            window.temperatureTimer
-        );
-
-        window.temperatureTimer = null;
-    }
-
-
-    // --------------------------------------------------------
-    // Demande de reboot
-    // --------------------------------------------------------
-
-    try
-    {
-        await fetch(
-            "/api/reboot",
-            {
-                method: "GET",
-                cache: "no-store"
-            }
-        );
-    }
-    catch (error)
-    {
-        // Normal :
-        // l'ESP peut couper la connexion
-        // immédiatement pendant son reboot.
-    }
-
-
-    // --------------------------------------------------------
-    // Attente du redémarrage
-    // --------------------------------------------------------
-
-    setTimeout(
-        function()
-        {
-            location.reload();
-        },
-        5000
-    );
 }
 
 
@@ -376,26 +283,18 @@ updateTemperatures();
 
 
 // ============================================================
-// RAFRAICHISSEMENT AUTOMATIQUE
+// RAFRAICHISSEMENT
 // ============================================================
 
-window.statusTimer =
-    setInterval(
-        updateStatus,
-        3000
-    );
+setInterval(
+    updateStatus,
+    3000
+);
 
-
-window.temperatureTimer =
-    setInterval(
-        updateTemperatures,
-        2000
-    );
-
-
-// ============================================================
-// FIN
-// ============================================================
+setInterval(
+    updateTemperatures,
+    2000
+);
 
 )rawliteral";
 
