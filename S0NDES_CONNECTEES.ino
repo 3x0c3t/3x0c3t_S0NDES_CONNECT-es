@@ -5,6 +5,7 @@
 #include "leds.h"
 #include "buzzer.h"
 #include "oled.h"
+#include "splashScreen.h"
 #include "wifi.h"
 #include "webserver.h"
 #include "temperature.h"

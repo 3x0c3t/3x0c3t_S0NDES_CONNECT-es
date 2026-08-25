@@ -5,12 +5,10 @@
 
 void oledInit();
 
-void splashScreen();
+void oledSplash();
 
-void wifiScreen(bool ok,String ip);
+void wifiScreen(bool ok, String ip);
 
 void temperatureScreen();
 
-
 #endif
-void oledSplash();
