@@ -1,7 +1,7 @@
 #ifndef CSS_H
 #define CSS_H
 
-const char CSS_PAGE[] PROGMEM = R"rawliteral(
+const char cssStyle[] PROGMEM = R"rawliteral(
 
 /* ============================================================
    RESET
@@ -25,26 +25,40 @@ body
 
 body
 {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #101214;
-    color: #f1f1f1;
+    background: #101318;
+    color: #f2f4f7;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 16px;
+
+    overflow-x: hidden;
 }
 
 
 /* ============================================================
-   PAGE
+   APPLICATION
    ============================================================ */
 
-.page
+.app
 {
     width: 100%;
-    min-height: 100vh;
+    max-width: 1800px;
+    min-height: 100dvh;
+
+    margin: 0 auto;
+
+    padding:
+        clamp(6px, 1vw, 18px);
 
     display: flex;
     flex-direction: column;
 
-    padding: clamp(8px, 1.5vw, 24px);
-    gap: clamp(8px, 1.2vw, 18px);
+    gap:
+        clamp(6px, .8vw, 12px);
 }
 
 
@@ -54,80 +68,188 @@ body
 
 .header
 {
-    width: 100%;
-
     display: flex;
+
     align-items: center;
     justify-content: space-between;
 
     gap: 12px;
 
-    padding: clamp(10px, 1.5vw, 18px);
+    padding:
+        clamp(8px, 1vw, 14px)
+        clamp(10px, 1.5vw, 20px);
 
-    background: #181b1f;
-    border: 1px solid #2d3238;
-    border-radius: 12px;
+    background: #181c22;
+
+    border:
+        1px solid #292f38;
+
+    border-radius:
+        clamp(8px, 1vw, 14px);
 }
 
-.header-title
+.brand
 {
-    font-size: clamp(18px, 2vw, 30px);
-    font-weight: bold;
+    min-width: 0;
 }
 
-.header-links
+.brand-title
+{
+    font-size:
+        clamp(19px, 2vw, 30px);
+
+    font-weight: 700;
+
+    line-height: 1;
+}
+
+.brand-subtitle
+{
+    margin-top: 4px;
+
+    color: #8e98a6;
+
+    font-size:
+        clamp(10px, .8vw, 13px);
+}
+
+.links
 {
     display: flex;
+
+    align-items: center;
+
     gap: 10px;
 
-    font-size: clamp(10px, 1vw, 14px);
+    white-space: nowrap;
 }
 
-.header-links a
+.links a
 {
-    color: #8ea7ff;
+    color: #737d89;
+
     text-decoration: none;
-    opacity: 0.8;
+
+    font-size:
+        clamp(9px, .8vw, 12px);
 }
 
-.header-links a:hover
+.links a:hover
 {
-    opacity: 1;
-    text-decoration: underline;
+    color: #ffffff;
 }
 
 
 /* ============================================================
-   STATUS WIFI
+   PANELS
    ============================================================ */
 
-.status-row
+.panel
 {
-    width: 100%;
+    background: #181c22;
 
+    border:
+        1px solid #292f38;
+
+    border-radius:
+        clamp(8px, 1vw, 14px);
+
+    padding:
+        clamp(9px, 1vw, 16px);
+
+    min-width: 0;
+}
+
+.panel-title
+{
+    margin-bottom:
+        clamp(6px, .7vw, 10px);
+
+    font-size:
+        clamp(14px, 1.3vw, 19px);
+
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   SYSTEME
+   ============================================================ */
+
+.system-grid
+{
     display: grid;
 
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns:
+        minmax(0, 2fr)
+        minmax(190px, 1fr);
 
-    gap: 12px;
+    gap:
+        clamp(6px, .8vw, 12px);
 }
 
-.status
+.system-panel
 {
-    min-width: 0;
+    display: flex;
 
-    padding: clamp(10px, 1.3vw, 18px);
+    flex-direction: column;
 
-    background: #181b1f;
-    border: 1px solid #2d3238;
-    border-radius: 12px;
+    justify-content: space-between;
 }
 
-.status p
+.reboot-button
 {
-    margin: 4px 0;
+    width: 100%;
+}
 
-    font-size: clamp(12px, 1.2vw, 17px);
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+.status-content
+{
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 6px;
+
+    color: #cbd1d8;
+
+    font-size:
+        clamp(11px, .9vw, 14px);
+}
+
+.status-content p
+{
+    margin: 0;
+
+    padding: 7px;
+
+    background: #11151a;
+
+    border-radius: 6px;
+}
+
+.status-content strong
+{
+    color: #ffffff;
+}
+
+.ok
+{
+    color: #4ade80;
+
+    font-weight: 700;
+}
+
+.error
+{
+    color: #f87171;
+
+    font-weight: 700;
 }
 
 
@@ -135,116 +257,84 @@ body
    BOUTONS
    ============================================================ */
 
-button
+.button-row
 {
-    border: 0;
-    border-radius: 8px;
+    display: flex;
 
-    padding: 10px 16px;
+    flex-wrap: wrap;
 
-    font-size: clamp(12px, 1vw, 15px);
+    gap: 6px;
+}
+
+.button
+{
+    appearance: none;
+
+    border:
+        1px solid #343b46;
+
+    background: #252b33;
+
+    color: #ffffff;
+
+    border-radius: 7px;
+
+    min-height: 34px;
+
+    padding:
+        5px 11px;
+
+    font-size:
+        clamp(11px, .9vw, 14px);
 
     cursor: pointer;
 
-    background: #30363d;
-    color: white;
+    transition:
+        background .15s,
+        transform .1s;
 }
 
-button:hover
+.button:hover
 {
-    filter: brightness(1.2);
+    background: #303743;
 }
 
-button:active
+.button:active
 {
-    transform: scale(0.98);
+    transform: scale(.97);
 }
 
-.btn-reboot
+.button-danger
 {
-    align-self: stretch;
+    background: #7f2525;
 
-    min-width: 110px;
-
-    background: #9b2c2c;
+    border-color:
+        #a33434;
 }
 
-
-/* ============================================================
-   CONTENU PRINCIPAL
-   ============================================================ */
-
-.main
+.button-danger:hover
 {
-    width: 100%;
-
-    display: grid;
-
-    grid-template-columns:
-        minmax(0, 1fr)
-        minmax(0, 1fr);
-
-    gap: clamp(8px, 1.2vw, 18px);
-
-    flex: 1;
+    background: #9a2d2d;
 }
 
-
-/* ============================================================
-   BLOCS
-   ============================================================ */
-
-.panel
+.button-blue
 {
-    min-width: 0;
-
-    padding: clamp(10px, 1.4vw, 20px);
-
-    background: #181b1f;
-    border: 1px solid #2d3238;
-    border-radius: 12px;
+    border-color: #245b91;
 }
 
-.panel-title
+.button-green
 {
-    margin: 0 0 12px 0;
-
-    font-size: clamp(16px, 1.5vw, 22px);
+    border-color: #287447;
 }
 
-
-/* ============================================================
-   TEMPERATURES
-   ============================================================ */
-
-#temperatures
+.button-red
 {
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            auto-fit,
-            minmax(110px, 1fr)
-        );
-
-    gap: clamp(8px, 1vw, 14px);
+    border-color: #873131;
 }
 
-.temperature
+.button-orange
 {
-    min-width: 0;
-
-    padding: clamp(10px, 1.2vw, 18px);
-
-    text-align: center;
-
-    background: #22272e;
-
-    border-radius: 10px;
-
-    font-size: clamp(15px, 1.5vw, 24px);
-
-    font-weight: bold;
+    border-color: #966127;
 }
 
 
@@ -252,92 +342,253 @@ button:active
    PILOTAGE
    ============================================================ */
 
-.controls
+.control-groups
+{
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        clamp(8px, 1vw, 16px);
+}
+
+.control-label
+{
+    color: #9da7b3;
+
+    font-size:
+        clamp(11px, .8vw, 13px);
+
+    margin-bottom: 6px;
+}
+
+
+/* ============================================================
+   RAFRAICHISSEMENT
+   ============================================================ */
+
+.refresh-settings
+{
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+}
+
+.refresh-description
+{
+    color: #7f8996;
+
+    font-size:
+        clamp(10px, .8vw, 13px);
+}
+
+.refresh-control
+{
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 7px;
+
+    white-space: nowrap;
+}
+
+.refresh-control label
+{
+    color: #9da7b3;
+
+    font-size:
+        clamp(11px, .8vw, 13px);
+}
+
+.refresh-control input
+{
+    width: 65px;
+
+    height: 34px;
+
+    padding:
+        5px 8px;
+
+    border:
+        1px solid #343b46;
+
+    border-radius: 7px;
+
+    background: #11151a;
+
+    color: #ffffff;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+.refresh-control span
+{
+    color: #9da7b3;
+
+    font-size:
+        clamp(10px, .8vw, 13px);
+}
+
+
+/* ============================================================
+   SONDES
+   ============================================================ */
+
+.sensor-grid
 {
     display: grid;
 
     grid-template-columns:
         repeat(
             auto-fit,
-            minmax(100px, 1fr)
+            minmax(220px, 1fr)
         );
+
+    gap:
+        clamp(6px, .8vw, 12px);
+}
+
+.sensor-card
+{
+    background: #11151a;
+
+    border:
+        1px solid #292f38;
+
+    border-radius: 9px;
+
+    padding:
+        clamp(9px, 1vw, 14px);
+
+    min-width: 0;
+}
+
+.sensor-header
+{
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
 
     gap: 8px;
+
+    margin-bottom: 6px;
 }
 
-.controls button
+.sensor-name
 {
-    width: 100%;
+    font-weight: 700;
+
+    font-size:
+        clamp(13px, 1.1vw, 16px);
 }
 
-
-/* ============================================================
-   CONSIGNES
-   ============================================================ */
-
-.setpoints
+.sensor-state
 {
-    display: grid;
+    font-size:
+        clamp(9px, .7vw, 11px);
 
-    grid-template-columns:
-        repeat(
-            auto-fit,
-            minmax(130px, 1fr)
-        );
-
-    gap: 10px;
-
-    margin-top: 12px;
+    font-weight: 700;
 }
 
-.sensor
+.sensor-temperature
 {
-    padding: 12px;
+    font-size:
+        clamp(25px, 2.8vw, 42px);
 
-    background: #22272e;
+    font-weight: 700;
 
-    border-radius: 10px;
+    line-height: 1;
+
+    margin:
+        7px 0 10px;
 }
 
-.sensor-title
+.sensor-setpoint
 {
-    margin-bottom: 8px;
+    display: flex;
 
-    font-weight: bold;
+    align-items: center;
 
-    font-size: clamp(13px, 1.1vw, 17px);
+    justify-content: space-between;
+
+    gap: 8px;
+
+    padding-top: 7px;
+
+    border-top:
+        1px solid #252b33;
 }
 
-.sensor input
+.setpoint-label
 {
-    width: 100%;
+    color: #8e98a6;
 
-    padding: 8px;
+    font-size:
+        clamp(10px, .8vw, 12px);
+}
 
-    border: 1px solid #444b53;
+.setpoint-value
+{
+    font-size:
+        clamp(15px, 1.3vw, 20px);
+
+    font-weight: 700;
+}
+
+.setpoint-buttons
+{
+    display: flex;
+
+    gap: 5px;
+}
+
+.setpoint-button
+{
+    width: 34px;
+    height: 34px;
+
+    border: 0;
+
     border-radius: 6px;
 
-    background: #101214;
-    color: white;
+    background: #252b33;
 
-    font-size: 16px;
+    color: #ffffff;
+
+    font-size: 19px;
+
+    cursor: pointer;
 }
 
-
-/* ============================================================
-   ETATS
-   ============================================================ */
-
-.ok
+.setpoint-button:hover
 {
-    color: #55d66f;
-    font-weight: bold;
+    background: #343b46;
 }
 
-.error
+.sensor-ok
 {
-    color: #ff6464;
-    font-weight: bold;
+    color: #4ade80;
+}
+
+.sensor-low
+{
+    color: #60a5fa;
+}
+
+.sensor-high
+{
+    color: #f87171;
 }
 
 
@@ -347,13 +598,41 @@ button:active
 
 .footer
 {
-    text-align: center;
+    display: flex;
 
-    font-size: clamp(9px, 0.8vw, 12px);
+    justify-content: space-between;
 
-    opacity: 0.5;
+    color: #626c78;
 
-    padding: 4px;
+    font-size:
+        clamp(8px, .7vw, 10px);
+
+    padding:
+        2px 4px;
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 900px)
+{
+    .system-grid
+    {
+        grid-template-columns: 1fr;
+    }
+
+    .status-content
+    {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .control-groups
+    {
+        grid-template-columns: 1fr;
+    }
 }
 
 
@@ -361,68 +640,122 @@ button:active
    MOBILE
    ============================================================ */
 
-@media (max-width: 700px)
+@media (max-width: 600px)
 {
-    .page
+    .app
     {
-        padding: 6px;
-        gap: 6px;
+        padding: 5px;
+
+        gap: 5px;
     }
 
     .header
     {
+        padding: 7px 9px;
+    }
+
+    .links
+    {
+        gap: 6px;
+    }
+
+    .panel
+    {
+        padding: 8px;
+    }
+
+    .status-content
+    {
+        gap: 4px;
+    }
+
+    .status-content p
+    {
+        padding: 5px;
+    }
+
+    .button
+    {
+        min-height: 32px;
+
+        padding:
+            4px 8px;
+    }
+
+    .refresh-settings
+    {
+        align-items: flex-start;
+
         flex-direction: column;
-        align-items: stretch;
-        text-align: center;
     }
 
-    .header-links
-    {
-        justify-content: center;
-    }
-
-    .status-row
-    {
-        grid-template-columns: 1fr;
-    }
-
-    .btn-reboot
+    .refresh-control
     {
         width: 100%;
-        min-height: 42px;
+
+        justify-content: flex-start;
+
+        flex-wrap: wrap;
     }
 
-    .main
+    .sensor-grid
     {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 5px;
+    }
+
+    .sensor-card
+    {
+        padding: 7px;
+    }
+
+    .sensor-temperature
+    {
+        font-size: 27px;
+
+        margin:
+            5px 0 8px;
+    }
+
+    .setpoint-button
+    {
+        width: 31px;
+        height: 31px;
     }
 }
 
 
 /* ============================================================
-   PETITS ECRANS
+   PETITS MOBILES
    ============================================================ */
 
-@media (max-width: 420px)
+@media (max-width: 380px)
 {
-    .page
+    .brand-title
     {
-        padding: 4px;
-        gap: 4px;
+        font-size: 17px;
     }
 
-    .header,
-    .status,
-    .panel
+    .brand-subtitle
     {
-        border-radius: 8px;
-        padding: 9px;
+        display: none;
     }
 
-    .temperature
+    .links a
     {
-        padding: 9px;
-        font-size: 16px;
+        font-size: 8px;
+    }
+
+    .sensor-grid
+    {
+        grid-template-columns: 1fr;
+    }
+
+    .status-content
+    {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -431,12 +764,60 @@ button:active
    TV / GRAND ECRAN
    ============================================================ */
 
-@media (min-width: 1600px)
+@media (min-width: 1400px)
 {
-    .page
+    .sensor-grid
     {
-        max-width: 1800px;
-        margin: auto;
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+    }
+}
+
+
+/* ============================================================
+   PAYSAGE MOBILE / ECRAN BAS
+   ============================================================ */
+
+@media
+    (max-height: 600px)
+    and
+    (orientation: landscape)
+{
+    .app
+    {
+        gap: 4px;
+    }
+
+    .header
+    {
+        padding:
+            5px 8px;
+    }
+
+    .panel
+    {
+        padding: 6px;
+    }
+
+    .panel-title
+    {
+        margin-bottom: 4px;
+    }
+
+    .sensor-temperature
+    {
+        font-size: 23px;
+
+        margin:
+            3px 0 6px;
+    }
+
+    .button
+    {
+        min-height: 29px;
+
+        padding:
+            3px 7px;
     }
 }
 
