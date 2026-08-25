@@ -1,129 +1,98 @@
-# 3x0c3t_S0NDES_CONNECT-es
+# 🌡️ 3x0c3t_S0NDES_CONNECT-es
 
-Système connecté de surveillance de température basé sur **ESP8266 NodeMCU**, avec affichage OLED, sondes DS18B20, Wi-Fi, serveur Web et OTA.
+Système de sondes de température connectées basé sur **ESP8266**.
 
-Projet développé par **3x0c3t**.
-
----
-
-## Sommaire
-
-- [Présentation](#présentation)
-- [Fonctionnalités](#fonctionnalités)
-- [Matériel](#matériel)
-- [Architecture du projet](#architecture-du-projet)
-- [Déroulement du démarrage](#déroulement-du-démarrage)
-- [Affichage OLED](#affichage-oled)
-- [LED](#led)
-- [Buzzer](#buzzer)
-- [Wi-Fi](#wi-fi)
-- [Sondes de température](#sondes-de-température)
-- [Serveur Web](#serveur-web)
-- [OTA](#ota)
-- [Configuration](#configuration)
-- [Compilation](#compilation)
-- [Installation](#installation)
-- [Structure des fichiers](#structure-des-fichiers)
-- [Mémoire utilisée](#mémoire-utilisée)
-- [Version](#version)
+Le projet permet de mesurer des températures avec des sondes DS18B20, d'afficher les informations sur un écran OLED, de signaler l'état du système par LEDs et buzzer, de se connecter en Wi-Fi et de fournir une interface Web embarquée.
 
 ---
 
-# Présentation
+# 🚧 Version de développement
 
-**3x0c3t_S0NDES_CONNECT-es** est un système de surveillance de température connecté construit autour d'un ESP8266.
+> **VERSION DE DÉVELOPPEMENT**
+>
+> Cette version `v1.2` est actuellement en cours de développement.
+>
+> Le fonctionnement global, l'interface OLED, l'interface Web et certaines fonctions de pilotage peuvent être **incomplets, expérimentaux ou non fonctionnels**.
+>
+> Le code est susceptible d'évoluer rapidement et des modifications importantes de l'architecture peuvent encore intervenir.
 
-Le système permet :
+**Version : `v1.2-dev`**
 
-- de mesurer la température avec des sondes **DS18B20** ;
-- d'afficher les températures sur un écran **OLED SSD1306 128×64** ;
-- de se connecter à un réseau Wi-Fi ;
-- d'afficher l'adresse IP obtenue ;
-- de fournir une interface Web ;
-- de mettre à jour le firmware à distance avec **OTA** ;
-- d'utiliser des LED pour signaler différents états ;
-- d'utiliser un buzzer pour fournir des indications sonores au démarrage et lors de la connexion Wi-Fi.
+**Date : `25 août 2026`**
 
----
-
-# Fonctionnalités
-
-## Surveillance de température
-
-Les températures sont mesurées avec des capteurs **DS18B20** utilisant le protocole OneWire.
-
-Les valeurs sont affichées périodiquement sur l'écran OLED.
+**Heure de référence : `04:54`**
 
 ---
 
-## Écran OLED
+# 🎯 Objectif actuel de la v1.2
 
-L'affichage utilise :
+La version `v1.2` a pour objectif de transformer progressivement le système en une plateforme de surveillance et de **pilotage à distance de l'ESP8266**.
 
-- écran OLED SSD1306 ;
-- résolution : **128 × 64 pixels** ;
-- communication : **I²C** ;
-- bibliothèque : **U8g2**.
+Les priorités actuelles sont :
 
-L'écran est utilisé pour plusieurs étapes :
+### OLED
 
-1. Splash screen ;
-2. écran d'informations de démarrage ;
-3. informations de connexion Wi-Fi ;
-4. affichage des températures.
+Ajouter au fonctionnement actuel :
 
-L'OLED constitue donc l'interface locale principale du système.
+- affichage du **SSID Wi-Fi utilisé** ;
+- affichage de l'adresse IP ;
+- conservation des informations de démarrage ;
+- affichage des températures ;
+- amélioration progressive de la présentation.
 
----
+### Interface Web
 
-## Wi-Fi
+Développer une interface permettant de piloter l'ESP8266 en direct :
 
-Le module se connecte automatiquement au réseau configuré dans `config.h`.
+- affichage de l'état du système ;
+- retour d'informations ;
+- modification des consignes ;
+- contrôle du buzzer ;
+- contrôle des LEDs ;
+- redémarrage de l'ESP8266 ;
+- consultation des températures ;
+- informations réseau ;
+- état général du système.
 
-En cas de connexion réussie :
-
-- l'état Wi-Fi est indiqué ;
-- l'adresse IP est affichée ;
-- une séquence sonore est jouée ;
-- les LED indiquent la réussite.
-
-En cas d'échec :
-
-- l'erreur est affichée ;
-- une séquence sonore d'échec est jouée ;
-- les LED indiquent l'erreur.
+L'interface Web doit progressivement devenir le **panneau de contrôle principal** du système.
 
 ---
 
-## Serveur Web
+# ✨ Fonctionnalités
 
-Le système démarre un serveur Web sur l'ESP8266.
+## Actuellement présentes
 
-Le serveur permet notamment d'accéder aux informations du système depuis un navigateur Web.
+- 🌡️ Lecture des températures
+- 📺 Affichage OLED
+- 📡 Connexion Wi-Fi
+- 🌐 Serveur Web embarqué
+- 🔄 Mise à jour OTA
+- 💡 Gestion des LEDs
+- 🔊 Gestion du buzzer
+- 🎵 Mélodie de démarrage
+- 🚀 Splash screen
+- 🖥️ Écran de démarrage / informations système
+- 🧩 Architecture modulaire
 
-Les ressources Web sont séparées dans différents fichiers :
+## En développement pour v1.2
 
-- `html.h`
-- `css.h`
-- `js.h`
+- 📶 Affichage du SSID Wi-Fi sur OLED
+- 🌐 Tableau de bord Web
+- 🎛️ Pilotage direct de l'ESP8266
+- 💡 Pilotage des LEDs depuis le Web
+- 🔊 Pilotage du buzzer depuis le Web
+- 🌡️ Gestion des consignes
+- ⚠️ Gestion des alertes
+- 🔄 Redémarrage logiciel depuis le Web
+- 📊 Retour d'état en temps réel
+- 📡 Informations réseau
+- 🖥️ Amélioration des écrans OLED
 
 ---
 
-## Mise à jour OTA
-
-Le firmware peut être mis à jour à distance grâce à **ArduinoOTA**.
-
-Cela permet d'éviter de reconnecter physiquement l'ESP8266 à l'ordinateur à chaque nouvelle version.
-
----
-
-# Matériel
+# 🧰 Matériel
 
 ## Microcontrôleur
 
-**ESP8266 NodeMCU**
-
-Carte utilisée pour le développement :
-
 ```text
-NodeMCU ESP8266
+ESP8266 NodeMCU
