@@ -5,18 +5,24 @@
 #include <ESP8266WiFi.h>
 
 #include "html.h"
+#include "css.h"
+#include "js.h"
+
+#include "settings.h"
 #include "temperature.h"
 #include "leds.h"
 #include "buzzer.h"
 
-extern float temperatures[];
-extern uint8_t sensorCount;
+
+// ============================================================
+// SERVEUR HTTP
+// ============================================================
 
 ESP8266WebServer server(80);
 
 
 // ============================================================
-// PAGE PRINCIPALE
+// PAGE HTML
 // ============================================================
 
 void handleRoot()
@@ -30,29 +36,77 @@ void handleRoot()
 
 
 // ============================================================
-// ÉTAT DU SYSTÈME
+// CSS
+// ============================================================
+
+void handleCSS()
+{
+    server.send(
+        200,
+        "text/css",
+        cssStyle
+    );
+}
+
+
+// ============================================================
+// JAVASCRIPT
+// ============================================================
+
+void handleJS()
+{
+    server.send(
+        200,
+        "application/javascript",
+        JS_PAGE
+    );
+}
+
+
+// ============================================================
+// STATUS
 // ============================================================
 
 void handleStatus()
 {
     String json = "{";
 
+    // --------------------------------------------------------
+    // WiFi
+    // --------------------------------------------------------
+
     json += "\"wifi\":";
     json += (WiFi.status() == WL_CONNECTED ? "true" : "false");
+
+    // --------------------------------------------------------
+    // SSID
+    // --------------------------------------------------------
 
     json += ",\"ssid\":\"";
     json += WiFi.SSID();
     json += "\"";
 
+    // --------------------------------------------------------
+    // IP
+    // --------------------------------------------------------
+
     json += ",\"ip\":\"";
     json += WiFi.localIP().toString();
     json += "\"";
 
+    // --------------------------------------------------------
+    // RSSI
+    // --------------------------------------------------------
+
     json += ",\"rssi\":";
     json += String(WiFi.RSSI());
 
+    // --------------------------------------------------------
+    // UPTIME
+    // --------------------------------------------------------
+
     json += ",\"uptime\":";
-    json += String(millis());
+    json += String(millis() / 1000);
 
     json += "}";
 
@@ -65,22 +119,29 @@ void handleStatus()
 
 
 // ============================================================
-// TEMPÉRATURES
+// TEMPERATURES
 // ============================================================
 
 void handleTemperatures()
 {
     String json = "{";
+
     json += "\"count\":";
     json += String(sensorCount);
-    json += ",\"values\":[";
+
+    json += ",\"temperatures\":[";
 
     for (uint8_t i = 0; i < sensorCount; i++)
     {
         if (i > 0)
+        {
             json += ",";
+        }
 
-        json += String(temperatures[i], 2);
+        json += String(
+            temperatures[i],
+            2
+        );
     }
 
     json += "]}";
@@ -97,14 +158,14 @@ void handleTemperatures()
 // LED
 // ============================================================
 
-void handleLed()
+void handleLED()
 {
     if (!server.hasArg("color"))
     {
         server.send(
             400,
-            "text/plain",
-            "Missing color"
+            "application/json",
+            "{\"error\":\"missing color\"}"
         );
 
         return;
@@ -112,32 +173,115 @@ void handleLed()
 
     String color = server.arg("color");
 
+    color.toLowerCase();
+
+    // --------------------------------------------------------
+    // OFF
+    // --------------------------------------------------------
+
     if (color == "off")
     {
         ledsOff();
     }
-    else if (color == "green")
-    {
-        ledsGreenBlink3();
-    }
+
+    // --------------------------------------------------------
+    // RED
+    // --------------------------------------------------------
+
     else if (color == "red")
     {
-        ledsRedBlink3();
+        analogWrite(
+            LED_RED,
+            255
+        );
+
+        analogWrite(
+            LED_GREEN,
+            0
+        );
+
+        analogWrite(
+            LED_BLUE,
+            0
+        );
     }
+
+    // --------------------------------------------------------
+    // GREEN
+    // --------------------------------------------------------
+
+    else if (color == "green")
+    {
+        analogWrite(
+            LED_RED,
+            0
+        );
+
+        analogWrite(
+            LED_GREEN,
+            255
+        );
+
+        analogWrite(
+            LED_BLUE,
+            0
+        );
+    }
+
+    // --------------------------------------------------------
+    // BLUE
+    // --------------------------------------------------------
+
+    else if (color == "blue")
+    {
+        analogWrite(
+            LED_RED,
+            0
+        );
+
+        analogWrite(
+            LED_GREEN,
+            0
+        );
+
+        analogWrite(
+            LED_BLUE,
+            255
+        );
+    }
+
+    // --------------------------------------------------------
+    // ORANGE
+    // --------------------------------------------------------
+
     else if (color == "orange")
     {
-        ledsOrangeFade();
+        analogWrite(
+            LED_RED,
+            255
+        );
+
+        analogWrite(
+            LED_GREEN,
+            127
+        );
+
+        analogWrite(
+            LED_BLUE,
+            0
+        );
     }
-    else if (color == "rainbow")
-    {
-        ledsRainbow();
-    }
+
+    // --------------------------------------------------------
+    // UNKNOWN COLOR
+    // --------------------------------------------------------
+
     else
     {
         server.send(
             400,
-            "text/plain",
-            "Unknown LED command"
+            "application/json",
+            "{\"error\":\"unknown color\"}"
         );
 
         return;
@@ -161,8 +305,8 @@ void handleBuzzer()
     {
         server.send(
             400,
-            "text/plain",
-            "Missing action"
+            "application/json",
+            "{\"error\":\"missing action\"}"
         );
 
         return;
@@ -170,24 +314,57 @@ void handleBuzzer()
 
     String action = server.arg("action");
 
+    action.toLowerCase();
+
+    // --------------------------------------------------------
+    // TEST
+    // --------------------------------------------------------
+
     if (action == "beep")
     {
-        beep(1200, 150);
+        beep(
+            1200,
+            150
+        );
     }
+
+    // --------------------------------------------------------
+    // SUCCESS
+    // --------------------------------------------------------
+
     else if (action == "success")
     {
         successBeep();
     }
-    else if (action == "startup")
+
+    // --------------------------------------------------------
+    // WIFI SUCCESS
+    // --------------------------------------------------------
+
+    else if (action == "wifi-success")
     {
-        startupMelody();
+        wifiSuccessBeep();
     }
+
+    // --------------------------------------------------------
+    // WIFI FAILURE
+    // --------------------------------------------------------
+
+    else if (action == "wifi-failure")
+    {
+        wifiFailureBeep();
+    }
+
+    // --------------------------------------------------------
+    // UNKNOWN ACTION
+    // --------------------------------------------------------
+
     else
     {
         server.send(
             400,
-            "text/plain",
-            "Unknown buzzer command"
+            "application/json",
+            "{\"error\":\"unknown action\"}"
         );
 
         return;
@@ -210,26 +387,47 @@ void handleReboot()
     server.send(
         200,
         "application/json",
-        "{\"ok\":true,\"message\":\"Rebooting\"}"
+        "{\"ok\":true,\"message\":\"rebooting\"}"
     );
 
-    delay(300);
+    delay(100);
 
     ESP.restart();
 }
 
 
 // ============================================================
-// INITIALISATION
+// INITIALISATION SERVEUR
 // ============================================================
 
 void webserverInit()
 {
+    // --------------------------------------------------------
+    // Pages
+    // --------------------------------------------------------
+
     server.on(
         "/",
         HTTP_GET,
         handleRoot
     );
+
+    server.on(
+        "/style.css",
+        HTTP_GET,
+        handleCSS
+    );
+
+    server.on(
+        "/script.js",
+        HTTP_GET,
+        handleJS
+    );
+
+
+    // --------------------------------------------------------
+    // API
+    // --------------------------------------------------------
 
     server.on(
         "/api/status",
@@ -246,7 +444,7 @@ void webserverInit()
     server.on(
         "/api/led",
         HTTP_GET,
-        handleLed
+        handleLED
     );
 
     server.on(
@@ -261,14 +459,37 @@ void webserverInit()
         handleReboot
     );
 
+
+    // --------------------------------------------------------
+    // 404
+    // --------------------------------------------------------
+
+    server.onNotFound(
+        []()
+        {
+            server.send(
+                404,
+                "text/plain",
+                "Not found: " + server.uri()
+            );
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // START
+    // --------------------------------------------------------
+
     server.begin();
 
-    Serial.println("Webserver OK");
+    Serial.println(
+        "Webserver OK"
+    );
 }
 
 
 // ============================================================
-// BOUCLE
+// BOUCLE SERVEUR
 // ============================================================
 
 void webserverLoop()
