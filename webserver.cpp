@@ -115,7 +115,11 @@ void handleTemperatures()
 
     json += ",\"temperatures\":[";
 
-    for (uint8_t i = 0; i < sensorCount; i++)
+    for (
+        uint8_t i = 0;
+        i < sensorCount;
+        i++
+    )
     {
         if (i > 0)
         {
@@ -158,6 +162,10 @@ void handleLED()
     String color =
         server.arg("color");
 
+    Serial.print("API LED : ");
+    Serial.println(color);
+
+
     if (color == "red")
     {
         ledRed();
@@ -180,6 +188,12 @@ void handleLED()
     }
     else
     {
+        Serial.print(
+            "Couleur LED invalide : "
+        );
+
+        Serial.println(color);
+
         server.send(
             400,
             "application/json",
@@ -188,6 +202,16 @@ void handleLED()
 
         return;
     }
+
+
+    Serial.print(
+        "GPIO BLUE apres commande = "
+    );
+
+    Serial.println(
+        digitalRead(LED_BLUE)
+    );
+
 
     server.send(
         200,
@@ -216,6 +240,7 @@ void handleBuzzer()
 
     String action =
         server.arg("action");
+
 
     if (action == "on")
     {
@@ -255,6 +280,7 @@ void handleBuzzer()
 
         return;
     }
+
 
     server.send(
         200,
@@ -302,20 +328,11 @@ void handleNotFound()
 
 void webserverInit()
 {
-    // --------------------------------------------------------
-    // PAGE PRINCIPALE
-    // --------------------------------------------------------
-
     server.on(
         "/",
         HTTP_GET,
         handleRoot
     );
-
-
-    // --------------------------------------------------------
-    // CSS
-    // --------------------------------------------------------
 
     server.on(
         "/style.css",
@@ -323,21 +340,11 @@ void webserverInit()
         handleCSS
     );
 
-
-    // --------------------------------------------------------
-    // JAVASCRIPT
-    // --------------------------------------------------------
-
     server.on(
         "/script.js",
         HTTP_GET,
         handleJS
     );
-
-
-    // --------------------------------------------------------
-    // API STATUS
-    // --------------------------------------------------------
 
     server.on(
         "/api/status",
@@ -345,21 +352,11 @@ void webserverInit()
         handleStatus
     );
 
-
-    // --------------------------------------------------------
-    // API TEMPERATURES
-    // --------------------------------------------------------
-
     server.on(
         "/api/temperatures",
         HTTP_GET,
         handleTemperatures
     );
-
-
-    // --------------------------------------------------------
-    // API LED
-    // --------------------------------------------------------
 
     server.on(
         "/api/led",
@@ -367,21 +364,11 @@ void webserverInit()
         handleLED
     );
 
-
-    // --------------------------------------------------------
-    // API BUZZER
-    // --------------------------------------------------------
-
     server.on(
         "/api/buzzer",
         HTTP_GET,
         handleBuzzer
     );
-
-
-    // --------------------------------------------------------
-    // API REBOOT
-    // --------------------------------------------------------
 
     server.on(
         "/api/reboot",
@@ -389,19 +376,9 @@ void webserverInit()
         handleReboot
     );
 
-
-    // --------------------------------------------------------
-    // 404
-    // --------------------------------------------------------
-
     server.onNotFound(
         handleNotFound
     );
-
-
-    // --------------------------------------------------------
-    // START
-    // --------------------------------------------------------
 
     server.begin();
 
