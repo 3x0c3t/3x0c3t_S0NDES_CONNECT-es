@@ -52,28 +52,10 @@ void ledBlue()
 
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_GREEN, LOW);
-
     digitalWrite(LED_BLUE, HIGH);
 
     Serial.print("GPIO14 = ");
     Serial.println(digitalRead(LED_BLUE));
-
-    while (true)
-    {
-        digitalWrite(LED_BLUE, HIGH);
-
-        Serial.print(
-            "GPIO14 maintien HIGH = "
-        );
-
-        Serial.println(
-            digitalRead(LED_BLUE)
-        );
-
-        delay(1000);
-
-        yield();
-    }
 }
 
 
@@ -84,6 +66,8 @@ void ledBlue()
 void ledGreen()
 {
     Serial.println(">>> ledGreen()");
+
+    pinMode(LED_GREEN, OUTPUT);
 
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_GREEN, HIGH);
@@ -102,6 +86,8 @@ void ledRed()
 {
     Serial.println(">>> ledRed()");
 
+    pinMode(LED_RED, OUTPUT);
+
     digitalWrite(LED_RED, HIGH);
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_BLUE, LOW);
@@ -118,6 +104,10 @@ void ledRed()
 void ledOrange()
 {
     Serial.println(">>> ledOrange()");
+
+    pinMode(LED_RED, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_BLUE, OUTPUT);
 
     digitalWrite(LED_RED, HIGH);
     digitalWrite(LED_GREEN, HIGH);
@@ -225,6 +215,10 @@ void ledsOrangeFade()
 {
     Serial.println(">>> ledsOrangeFade()");
 
+    pinMode(LED_RED, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_BLUE, OUTPUT);
+
     for (
         int brightness = 0;
         brightness <= 255;
@@ -248,7 +242,6 @@ void ledsOrangeFade()
 
         delay(20);
     }
-
 
     for (
         int brightness = 255;
