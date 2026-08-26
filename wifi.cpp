@@ -23,11 +23,9 @@ void wifiInit()
 
     Serial.print("WiFi");
 
-
     uint8_t timeout = 0;
 
-
-    while(
+    while (
         WiFi.status() != WL_CONNECTED &&
         timeout < WIFI_TIMEOUT
     )
@@ -43,13 +41,15 @@ void wifiInit()
     Serial.println();
 
 
-    if(WiFi.status() == WL_CONNECTED)
+    // ========================================================
+    // WIFI OK
+    // ========================================================
+
+    if (WiFi.status() == WL_CONNECTED)
     {
         Serial.println("WiFi OK");
 
-
         String ssid = WiFi.SSID();
-
         String ip = WiFi.localIP().toString();
 
 
@@ -62,7 +62,9 @@ void wifiInit()
 
         bootWifiStatus(true);
 
-        bootIpAddress(ip.c_str());
+        bootIpAddress(
+            ip.c_str()
+        );
 
 
         wifiScreen(
@@ -72,14 +74,20 @@ void wifiInit()
         );
 
 
-        // ==========================================
-        // CONNEXION WIFI REUSSIE
-        // ==========================================
+        // ----------------------------------------------------
+        // CONNEXION REUSSIE
+        // ----------------------------------------------------
 
         wifiSuccessBeep();
 
         ledsGreenBlink3();
     }
+
+
+    // ========================================================
+    // WIFI FAIL
+    // ========================================================
+
     else
     {
         Serial.println("WiFi FAIL");
@@ -95,13 +103,11 @@ void wifiInit()
         );
 
 
-        // ==========================================
-        // CONNEXION WIFI ECHOUEE
-        // ==========================================
+        // ----------------------------------------------------
+        // CONNEXION ECHOUEE
+        // ----------------------------------------------------
 
         wifiFailureBeep();
-
-        ledsOrangeFade();
 
         ledsRedBlink3();
     }

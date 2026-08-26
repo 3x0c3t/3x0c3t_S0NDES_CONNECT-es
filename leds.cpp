@@ -3,27 +3,6 @@
 #include <Arduino.h>
 
 #include "settings.h"
-#include "bootscreen.h"
-
-
-// ============================================================
-// ÉTAT LED
-// ============================================================
-
-static void setAllLedsOff()
-{
-    digitalWrite(LED_BLUE, LOW);
-    digitalWrite(LED_GREEN, LOW);
-    digitalWrite(LED_RED, LOW);
-}
-
-
-static void prepareLeds()
-{
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
-    pinMode(LED_RED, OUTPUT);
-}
 
 
 // ============================================================
@@ -33,17 +12,22 @@ static void prepareLeds()
 void ledsInit()
 {
     Serial.println();
-    Serial.println(">>> ledsInit()");
+    Serial.println("==============================");
+    Serial.println("INITIALISATION LEDS");
+    Serial.println("==============================");
 
-    prepareLeds();
+    pinMode(LED_BLUE, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
 
-    setAllLedsOff();
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_RED, LOW);
 
-    Serial.println("LED BLUE  : OFF");
-    Serial.println("LED GREEN : OFF");
-    Serial.println("LED RED   : OFF");
-
-    bootLedStatus(true);
+    Serial.println("LED BLEUE  : GPIO14");
+    Serial.println("LED VERTE  : GPIO12");
+    Serial.println("LED ROUGE  : GPIO13");
+    Serial.println("LEDS OFF");
 }
 
 
@@ -53,133 +37,69 @@ void ledsInit()
 
 void ledsOff()
 {
-    prepareLeds();
-
-    setAllLedsOff();
-
-    Serial.println("LED : OFF");
-
-    bootLedStatus(true);
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_RED, LOW);
 }
 
 
 // ============================================================
-// BLEU
+// LED BLEUE
 // ============================================================
 
 void ledBlue()
 {
-    Serial.println(">>> ledBlue()");
-
-    prepareLeds();
-
-    // Éteindre les autres couleurs
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_RED, LOW);
 
-    // Séquence explicite du GPIO14
-    digitalWrite(LED_BLUE, LOW);
-
-    delay(20);
-
     digitalWrite(LED_BLUE, HIGH);
 
-    Serial.print("GPIO14 = ");
+    Serial.print("LED BLEUE : GPIO14 = ");
     Serial.println(digitalRead(LED_BLUE));
 }
 
 
 // ============================================================
-// VERT
+// LED VERTE
 // ============================================================
 
 void ledGreen()
 {
-    Serial.println(">>> ledGreen()");
-
-    prepareLeds();
-
-    // Éteindre les autres couleurs
     digitalWrite(LED_BLUE, LOW);
     digitalWrite(LED_RED, LOW);
 
-    // Séquence explicite du GPIO12
-    digitalWrite(LED_GREEN, LOW);
-
-    delay(20);
-
     digitalWrite(LED_GREEN, HIGH);
 
-    Serial.print("GPIO12 = ");
+    Serial.print("LED VERTE : GPIO12 = ");
     Serial.println(digitalRead(LED_GREEN));
 }
 
 
 // ============================================================
-// ROUGE
+// LED ROUGE
 // ============================================================
 
 void ledRed()
 {
-    Serial.println(">>> ledRed()");
-
-    prepareLeds();
-
-    // Éteindre les autres couleurs
     digitalWrite(LED_BLUE, LOW);
     digitalWrite(LED_GREEN, LOW);
 
-    // Séquence explicite du GPIO13
-    digitalWrite(LED_RED, LOW);
-
-    delay(20);
-
     digitalWrite(LED_RED, HIGH);
 
-    Serial.print("GPIO13 = ");
+    Serial.print("LED ROUGE : GPIO13 = ");
     Serial.println(digitalRead(LED_RED));
 }
 
 
 // ============================================================
-// ORANGE
-// ============================================================
-
-void ledOrange()
-{
-    Serial.println(">>> ledOrange()");
-
-    prepareLeds();
-
-    // Bleu OFF
-    digitalWrite(LED_BLUE, LOW);
-
-    // Rouge + vert ON
-    digitalWrite(LED_RED, LOW);
-    digitalWrite(LED_GREEN, LOW);
-
-    delay(20);
-
-    digitalWrite(LED_RED, HIGH);
-    digitalWrite(LED_GREEN, HIGH);
-
-    Serial.print("GPIO13 RED   = ");
-    Serial.println(digitalRead(LED_RED));
-
-    Serial.print("GPIO12 GREEN = ");
-    Serial.println(digitalRead(LED_GREEN));
-}
-
-
-// ============================================================
-// TEST DES LEDS AU DÉMARRAGE
+// TEST DES LEDS AU DEMARRAGE
 // ============================================================
 
 void ledsTest()
 {
     Serial.println();
     Serial.println("==============================");
-    Serial.println("TEST LEDS");
+    Serial.println("TEST LED DIRECT");
     Serial.println("==============================");
 
 
@@ -187,64 +107,84 @@ void ledsTest()
     // BLEU
     // --------------------------------------------------------
 
-    Serial.println("TEST BLEU");
+    Serial.println();
+    Serial.println("------------------------------");
+    Serial.println("LED BLEUE");
+    Serial.println("------------------------------");
 
-    ledBlue();
+    pinMode(LED_BLUE, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
 
-    delay(1000);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_BLUE, LOW);
 
-    ledsOff();
+    delay(500);
 
-    delay(300);
+    digitalWrite(LED_BLUE, HIGH);
+
+    Serial.print("GPIO14 = ");
+    Serial.println(digitalRead(LED_BLUE));
+
+    delay(3000);
+
+    digitalWrite(LED_BLUE, LOW);
+
+    Serial.println("GPIO14 LOW");
 
 
     // --------------------------------------------------------
     // VERT
     // --------------------------------------------------------
 
-    Serial.println("TEST VERT");
+    Serial.println();
+    Serial.println("------------------------------");
+    Serial.println("LED VERTE");
+    Serial.println("------------------------------");
 
-    ledGreen();
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_GREEN, HIGH);
+
+    Serial.print("GPIO12 = ");
+    Serial.println(digitalRead(LED_GREEN));
 
     delay(1000);
 
-    ledsOff();
-
-    delay(300);
+    digitalWrite(LED_GREEN, LOW);
 
 
     // --------------------------------------------------------
     // ROUGE
     // --------------------------------------------------------
 
-    Serial.println("TEST ROUGE");
+    Serial.println();
+    Serial.println("------------------------------");
+    Serial.println("LED ROUGE");
+    Serial.println("------------------------------");
 
-    ledRed();
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_RED, HIGH);
 
-    delay(1000);
-
-    ledsOff();
-
-    delay(300);
-
-
-    // --------------------------------------------------------
-    // ORANGE
-    // --------------------------------------------------------
-
-    Serial.println("TEST ORANGE");
-
-    ledOrange();
+    Serial.print("GPIO13 = ");
+    Serial.println(digitalRead(LED_RED));
 
     delay(1000);
 
+    digitalWrite(LED_RED, LOW);
+
+
+    // --------------------------------------------------------
+    // FIN
+    // --------------------------------------------------------
+
     ledsOff();
 
-    delay(300);
-
-
+    Serial.println();
     Serial.println("==============================");
-    Serial.println("TEST LEDS TERMINE");
+    Serial.println("TEST LED TERMINE");
     Serial.println("==============================");
 }
 
@@ -255,8 +195,6 @@ void ledsTest()
 
 void ledsRainbow()
 {
-    Serial.println(">>> ledsRainbow()");
-
     ledRed();
     delay(500);
 
@@ -271,98 +209,34 @@ void ledsRainbow()
 
 
 // ============================================================
-// CLIGNOTEMENT VERT
+// VERT CLIGNOTEMENT x3
 // ============================================================
 
 void ledsGreenBlink3()
 {
-    Serial.println(">>> ledsGreenBlink3()");
-
     for (int i = 0; i < 3; i++)
     {
         ledGreen();
-
-        delay(200);
+        delay(250);
 
         ledsOff();
-
-        delay(200);
+        delay(250);
     }
 }
 
 
 // ============================================================
-// CLIGNOTEMENT ROUGE
+// ROUGE CLIGNOTEMENT x3
 // ============================================================
 
 void ledsRedBlink3()
 {
-    Serial.println(">>> ledsRedBlink3()");
-
     for (int i = 0; i < 3; i++)
     {
         ledRed();
-
-        delay(200);
+        delay(250);
 
         ledsOff();
-
-        delay(200);
+        delay(250);
     }
-}
-
-
-// ============================================================
-// ORANGE FADE
-// ============================================================
-
-void ledsOrangeFade()
-{
-    Serial.println(">>> ledsOrangeFade()");
-
-    prepareLeds();
-
-    digitalWrite(LED_BLUE, LOW);
-
-    for (
-        int brightness = 0;
-        brightness <= 255;
-        brightness += 5
-    )
-    {
-        analogWrite(
-            LED_RED,
-            brightness
-        );
-
-        analogWrite(
-            LED_GREEN,
-            brightness / 2
-        );
-
-        delay(20);
-    }
-
-
-    for (
-        int brightness = 255;
-        brightness >= 0;
-        brightness -= 5
-    )
-    {
-        analogWrite(
-            LED_RED,
-            brightness
-        );
-
-        analogWrite(
-            LED_GREEN,
-            brightness / 2
-        );
-
-        delay(20);
-    }
-
-
-    setAllLedsOff();
 }
