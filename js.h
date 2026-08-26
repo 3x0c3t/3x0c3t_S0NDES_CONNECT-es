@@ -199,6 +199,33 @@ function changeSetpoint(
 }
 
 
+function setSensorSetpoint(
+    index,
+    value
+)
+{
+    const temperature =
+        saveSetpoint(
+            index,
+            value
+        );
+
+    const input =
+        document.getElementById(
+            "setpoint_" +
+            index
+        );
+
+    if (input)
+    {
+        input.value =
+            temperature.toFixed(1);
+    }
+
+    updateTemperatures();
+}
+
+
 /* ============================================================
    ETAT D'UNE SONDE
    ============================================================ */
@@ -566,6 +593,7 @@ function updateSensorSummary(
                     : ""
             ) +
             "</span>";
+
         return;
     }
 
@@ -581,6 +609,7 @@ function updateSensorSummary(
                     : ""
             ) +
             "</span>";
+
         return;
     }
 
@@ -600,37 +629,6 @@ function updateSensorSummary(
                 : ""
         ) +
         "</span>";
-}
-
-
-/* ============================================================
-   MODIFICATION CONSIGNE
-   ============================================================ */
-
-function setSensorSetpoint(
-    index,
-    value
-)
-{
-    const input =
-        document.getElementById(
-            "setpoint_" +
-            index
-        );
-
-    const temperature =
-        saveSetpoint(
-            index,
-            value
-        );
-
-    if (input)
-    {
-        input.value =
-            temperature.toFixed(1);
-    }
-
-    updateTemperatures();
 }
 
 

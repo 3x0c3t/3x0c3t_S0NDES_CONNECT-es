@@ -264,7 +264,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
 
     <!-- =====================================================
-         SONDES
+         SONDES & CONSIGNES
          ===================================================== -->
 
     <section class="panel sensors-panel">
@@ -297,7 +297,38 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             id="temperatures"
             class="sensor-grid"
         >
-            Chargement des sondes...
+
+            <div class="sensor-card state-gray">
+
+                <div class="sensor-header">
+
+                    <div class="sensor-name">
+                        <span class="sensor-icon">
+                            🌡️
+                        </span>
+                        S1
+                    </div>
+
+                    <div class="sensor-state">
+                        CHARGEMENT
+                    </div>
+
+                </div>
+
+                <div class="sensor-temperature">
+
+                    <span class="sensor-temperature-value">
+                        --
+                    </span>
+
+                    <span class="sensor-temperature-unit">
+                        °C
+                    </span>
+
+                </div>
+
+            </div>
+
         </div>
 
     </section>

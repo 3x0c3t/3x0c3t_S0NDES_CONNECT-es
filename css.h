@@ -541,36 +541,6 @@ body
    ETAT CARTE
    ============================================================ */
 
-.sensor-card::before
-{
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    top: 0;
-    bottom: 0;
-
-    width: 4px;
-
-    background: #4ade80;
-}
-
-.sensor-card.state-orange::before
-{
-    background: #f59e0b;
-}
-
-.sensor-card.state-red::before
-{
-    background: #ef4444;
-}
-
-.sensor-card.state-gray::before
-{
-    background: #64748b;
-}
-
 .sensor-card.state-green
 {
     border-color:
@@ -589,9 +559,15 @@ body
         rgba(239, 68, 68, .40);
 }
 
+.sensor-card.state-gray
+{
+    border-color:
+        rgba(100, 116, 139, .30);
+}
+
 
 /* ============================================================
-   EN-TETE CARTE
+   TITRE SONDE
    ============================================================ */
 
 .sensor-header
@@ -612,16 +588,92 @@ body
 
     gap: 7px;
 
+    padding:
+        6px 10px;
+
+    border-radius: 8px;
+
+    background: #252b33;
+
+    color: #ffffff;
+
     font-size:
         clamp(13px, 1.1vw, 16px);
 
     font-weight: 700;
+
+    transition:
+        background .2s,
+        color .2s,
+        box-shadow .2s;
+}
+
+
+/* ============================================================
+   COULEUR DU TITRE SELON L'ETAT
+   ============================================================ */
+
+.state-green .sensor-name
+{
+    background:
+        rgba(74, 222, 128, .18);
+
+    color:
+        #4ade80;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(74, 222, 128, .30);
+}
+
+.state-orange .sensor-name
+{
+    background:
+        rgba(245, 158, 11, .18);
+
+    color:
+        #f59e0b;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(245, 158, 11, .30);
+}
+
+.state-red .sensor-name
+{
+    background:
+        rgba(239, 68, 68, .18);
+
+    color:
+        #ef4444;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(239, 68, 68, .30);
+}
+
+.state-gray .sensor-name
+{
+    background:
+        rgba(100, 116, 139, .18);
+
+    color:
+        #94a3b8;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(100, 116, 139, .30);
 }
 
 .sensor-icon
 {
     font-size: 17px;
 }
+
+
+/* ============================================================
+   ETAT
+   ============================================================ */
 
 .sensor-state
 {
@@ -645,23 +697,29 @@ body
 
 .state-orange .sensor-state
 {
-    background: #2b2110;
+    background:
+        #2b2110;
 
-    color: #f59e0b;
+    color:
+        #f59e0b;
 }
 
 .state-red .sensor-state
 {
-    background: #2b1515;
+    background:
+        #2b1515;
 
-    color: #ef4444;
+    color:
+        #ef4444;
 }
 
 .state-gray .sensor-state
 {
-    background: #20252c;
+    background:
+        #20252c;
 
-    color: #94a3b8;
+    color:
+        #94a3b8;
 }
 
 
@@ -765,12 +823,20 @@ body
 
 .state-orange .sensor-bar-fill
 {
-    background: #f59e0b;
+    background:
+        #f59e0b;
 }
 
 .state-red .sensor-bar-fill
 {
-    background: #ef4444;
+    background:
+        #ef4444;
+}
+
+.state-gray .sensor-bar-fill
+{
+    background:
+        #64748b;
 }
 
 
@@ -838,12 +904,14 @@ body
 
 .setpoint-button:hover
 {
-    background: #303743;
+    background:
+        #303743;
 }
 
 .setpoint-button:active
 {
-    transform: scale(.94);
+    transform:
+        scale(.94);
 }
 
 .setpoint-input
@@ -914,7 +982,8 @@ body
 {
     .system-grid
     {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 
     .status-content
@@ -928,7 +997,8 @@ body
 
     .control-groups
     {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 }
 
@@ -1034,6 +1104,12 @@ body
         padding: 9px;
     }
 
+    .sensor-name
+    {
+        padding:
+            5px 8px;
+    }
+
     .sensor-temperature
     {
         margin:
@@ -1078,12 +1154,14 @@ body
 
     .sensor-grid
     {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 
     .status-content
     {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 }
 
