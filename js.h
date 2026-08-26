@@ -3,10 +3,6 @@
 
 const char JS_PAGE[] PROGMEM = R"rawliteral(
 
-/* ============================================================
-   API
-   ============================================================ */
-
 async function api(url)
 {
     const separator =
@@ -38,23 +34,15 @@ async function api(url)
 }
 
 
-/* ============================================================
-   ETAT WIFI
-   ============================================================ */
-
 async function updateStatus()
 {
     try
     {
         const data =
-            await api(
-                "/api/status"
-            );
+            await api("/api/status");
 
         const element =
-            document.getElementById(
-                "status"
-            );
+            document.getElementById("status");
 
         if (!element)
         {
@@ -96,9 +84,7 @@ async function updateStatus()
         );
 
         const element =
-            document.getElementById(
-                "status"
-            );
+            document.getElementById("status");
 
         if (element)
         {
@@ -111,18 +97,14 @@ async function updateStatus()
 }
 
 
-/* ============================================================
-   CONSIGNES
-   ============================================================ */
-
 const DEFAULT_SETPOINT = 25.0;
+
 
 function getSetpoint(index)
 {
     const stored =
         localStorage.getItem(
-            "sensorSetpoint_" +
-            index
+            "sensorSetpoint_" + index
         );
 
     if (stored === null)
@@ -142,10 +124,7 @@ function getSetpoint(index)
 }
 
 
-function saveSetpoint(
-    index,
-    value
-)
+function saveSetpoint(index, value)
 {
     let temperature =
         Number(value);
@@ -156,15 +135,14 @@ function saveSetpoint(
             DEFAULT_SETPOINT;
     }
 
-    if (temperature < -55)
-    {
-        temperature = -55;
-    }
-
-    if (temperature > 125)
-    {
-        temperature = 125;
-    }
+    temperature =
+        Math.max(
+            -55,
+            Math.min(
+                125,
+                temperature
+            )
+        );
 
     temperature =
         Math.round(
@@ -172,8 +150,7 @@ function saveSetpoint(
         ) / 10;
 
     localStorage.setItem(
-        "sensorSetpoint_" +
-        index,
+        "sensorSetpoint_" + index,
         temperature
     );
 
@@ -181,28 +158,21 @@ function saveSetpoint(
 }
 
 
-function changeSetpoint(
-    index,
-    delta
-)
+function changeSetpoint(index, delta)
 {
     const current =
         getSetpoint(index);
 
-    const value =
-        saveSetpoint(
-            index,
-            current + delta
-        );
+    saveSetpoint(
+        index,
+        current + delta
+    );
 
     updateTemperatures();
 }
 
 
-function setSensorSetpoint(
-    index,
-    value
-)
+function setSensorSetpoint(index, value)
 {
     const temperature =
         saveSetpoint(
@@ -212,8 +182,7 @@ function setSensorSetpoint(
 
     const input =
         document.getElementById(
-            "setpoint_" +
-            index
+            "setpoint_" + index
         );
 
     if (input)
@@ -226,20 +195,12 @@ function setSensorSetpoint(
 }
 
 
-/* ============================================================
-   ETAT D'UNE SONDE
-   ============================================================ */
-
 function getSensorState(
     temperature,
     setpoint
 )
 {
-    if (
-        !Number.isFinite(
-            temperature
-        )
-    )
+    if (!Number.isFinite(temperature))
     {
         return {
             className: "state-gray",
@@ -249,8 +210,7 @@ function getSensorState(
 
     const difference =
         Math.abs(
-            temperature -
-            setpoint
+            temperature - setpoint
         );
 
     if (difference >= 3)
@@ -276,10 +236,6 @@ function getSensorState(
 }
 
 
-/* ============================================================
-   TEMPERATURES
-   ============================================================ */
-
 async function updateTemperatures()
 {
     try
@@ -297,7 +253,7 @@ async function updateTemperatures()
         )
         {
             throw new Error(
-                "Format JSON températures invalide"
+                "Format températures invalide"
             );
         }
 
@@ -359,23 +315,23 @@ async function updateTemperatures()
                 alertCount++;
             }
 
-            const validTemperature =
+            const valid =
                 Number.isFinite(
                     temperature
                 );
 
             const temperatureText =
-                validTemperature
+                valid
                     ? temperature.toFixed(2)
                     : "--";
 
             const difference =
-                validTemperature
+                valid
                     ? temperature - setpoint
                     : 0;
 
             const differenceText =
-                validTemperature
+                valid
                     ? (
                         difference > 0
                             ? "+"
@@ -385,11 +341,9 @@ async function updateTemperatures()
                     " °C"
                     : "--";
 
-            const differenceAbsolute =
-                validTemperature
-                    ? Math.abs(
-                        difference
-                    )
+            const absoluteDifference =
+                valid
+                    ? Math.abs(difference)
                     : 0;
 
             const barWidth =
@@ -397,7 +351,7 @@ async function updateTemperatures()
                     100,
                     Math.max(
                         3,
-                        differenceAbsolute /
+                        absoluteDifference /
                         3 *
                         100
                     )
@@ -427,7 +381,6 @@ async function updateTemperatures()
 
                     "</div>" +
 
-
                     '<div class="sensor-temperature">' +
 
                         '<span class="sensor-temperature-value">' +
@@ -440,7 +393,6 @@ async function updateTemperatures()
 
                     "</div>" +
 
-
                     '<div class="sensor-difference">' +
 
                         "<span>Écart à la consigne</span>" +
@@ -450,7 +402,6 @@ async function updateTemperatures()
                         "</strong>" +
 
                     "</div>" +
-
 
                     '<div class="sensor-bar">' +
 
@@ -462,7 +413,6 @@ async function updateTemperatures()
                         "></div>" +
 
                     "</div>" +
-
 
                     '<div class="sensor-setpoint">' +
 
@@ -528,7 +478,7 @@ async function updateTemperatures()
     catch (error)
     {
         console.warn(
-            "Températures temporairement indisponibles",
+            "Températures indisponibles",
             error
         );
 
@@ -547,10 +497,6 @@ async function updateTemperatures()
     }
 }
 
-
-/* ============================================================
-   RESUME DES SONDES
-   ============================================================ */
 
 function updateSensorSummary(
     normal,
@@ -632,21 +578,13 @@ function updateSensorSummary(
 }
 
 
-/* ============================================================
-   LED
-   ============================================================ */
-
-async function led(
-    color
-)
+async function led(color)
 {
     try
     {
         await api(
             "/api/led?color=" +
-            encodeURIComponent(
-                color
-            )
+            encodeURIComponent(color)
         );
     }
     catch (error)
@@ -659,21 +597,13 @@ async function led(
 }
 
 
-/* ============================================================
-   BUZZER
-   ============================================================ */
-
-async function buzzer(
-    action
-)
+async function buzzer(action)
 {
     try
     {
         await api(
             "/api/buzzer?action=" +
-            encodeURIComponent(
-                action
-            )
+            encodeURIComponent(action)
         );
     }
     catch (error)
@@ -685,10 +615,6 @@ async function buzzer(
     }
 }
 
-
-/* ============================================================
-   REBOOT
-   ============================================================ */
 
 async function reboot()
 {
@@ -709,11 +635,6 @@ async function reboot()
     }
     catch (error)
     {
-        /*
-         * Normal :
-         * l'ESP peut couper la connexion
-         * pendant son redémarrage.
-         */
     }
 
     const element =
@@ -731,19 +652,11 @@ async function reboot()
 }
 
 
-/* ============================================================
-   COMPATIBILITE
-   ============================================================ */
-
 function rebootESP()
 {
     reboot();
 }
 
-
-/* ============================================================
-   RAFRAICHISSEMENT
-   ============================================================ */
 
 let refreshInterval = 5;
 let refreshTimer = null;
@@ -752,40 +665,34 @@ let refreshBusy = false;
 
 function getRefreshInterval()
 {
-    const element =
+    const input =
         document.getElementById(
             "refreshInterval"
         );
 
-    if (!element)
+    if (!input)
     {
         return 5;
     }
 
     let value =
         parseInt(
-            element.value,
+            input.value,
             10
         );
 
-    if (
-        !Number.isFinite(value)
-    )
+    if (!Number.isFinite(value))
     {
         value = 5;
     }
 
-    if (value < 1)
-    {
-        value = 1;
-    }
-
-    if (value > 60)
-    {
-        value = 60;
-    }
-
-    return value;
+    return Math.max(
+        1,
+        Math.min(
+            60,
+            value
+        )
+    );
 }
 
 
@@ -801,17 +708,6 @@ async function refreshAll()
     try
     {
         await updateStatus();
-
-        await new Promise(
-            function(resolve)
-            {
-                setTimeout(
-                    resolve,
-                    50
-                );
-            }
-        );
-
         await updateTemperatures();
     }
     finally
@@ -845,16 +741,14 @@ function startRefreshTimer()
         refreshTimer =
             setTimeout(
                 loop,
-                refreshInterval *
-                1000
+                refreshInterval * 1000
             );
     }
 
     refreshTimer =
         setTimeout(
             loop,
-            refreshInterval *
-            1000
+            refreshInterval * 1000
         );
 }
 
@@ -873,10 +767,6 @@ function changeRefreshInterval()
 }
 
 
-/* ============================================================
-   RESTAURATION INTERVALLE
-   ============================================================ */
-
 function restoreRefreshInterval()
 {
     const stored =
@@ -889,16 +779,6 @@ function restoreRefreshInterval()
         return;
     }
 
-    const value =
-        Number(stored);
-
-    if (
-        !Number.isFinite(value)
-    )
-    {
-        return;
-    }
-
     const input =
         document.getElementById(
             "refreshInterval"
@@ -907,20 +787,16 @@ function restoreRefreshInterval()
     if (input)
     {
         input.value =
-            Math.min(
-                60,
-                Math.max(
-                    1,
-                    value
+            Math.max(
+                1,
+                Math.min(
+                    60,
+                    Number(stored)
                 )
             );
     }
 }
 
-
-/* ============================================================
-   INITIALISATION
-   ============================================================ */
 
 async function init()
 {
@@ -931,10 +807,6 @@ async function init()
     startRefreshTimer();
 }
 
-
-/* ============================================================
-   DOM READY
-   ============================================================ */
 
 if (
     document.readyState ===

@@ -1,8 +1,9 @@
 #include "leds.h"
-#include "settings.h"
-#include "bootscreen.h"
 
 #include <Arduino.h>
+
+#include "settings.h"
+#include "bootscreen.h"
 
 
 // ============================================================
@@ -15,9 +16,11 @@ void ledsInit()
     pinMode(LED_GREEN, OUTPUT);
     pinMode(LED_RED, OUTPUT);
 
-    Serial.println("LED : initialisation");
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_RED, LOW);
 
-    ledsOff();
+    bootLedStatus(true);
 }
 
 
@@ -27,14 +30,11 @@ void ledsInit()
 
 void ledsOff()
 {
-    Serial.println(">>> ledsOff()");
-
     digitalWrite(LED_BLUE, LOW);
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_RED, LOW);
 
-    Serial.print("GPIO BLUE = ");
-    Serial.println(digitalRead(LED_BLUE));
+    Serial.println("LED OFF");
 
     bootLedStatus(true);
 }
@@ -52,9 +52,15 @@ void ledBlue()
 
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_GREEN, LOW);
+
     digitalWrite(LED_BLUE, HIGH);
 
-    Serial.print("GPIO14 = ");
+    Serial.print("GPIO14 immédiatement = ");
+    Serial.println(digitalRead(LED_BLUE));
+
+    delay(2000);
+
+    Serial.print("GPIO14 après 2 secondes = ");
     Serial.println(digitalRead(LED_BLUE));
 }
 
@@ -67,13 +73,16 @@ void ledGreen()
 {
     Serial.println(">>> ledGreen()");
 
+    pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
 
-    digitalWrite(LED_RED, LOW);
-    digitalWrite(LED_GREEN, HIGH);
     digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_RED, LOW);
 
-    Serial.print("GPIO GREEN = ");
+    digitalWrite(LED_GREEN, HIGH);
+
+    Serial.print("GPIO12 = ");
     Serial.println(digitalRead(LED_GREEN));
 }
 
@@ -86,13 +95,16 @@ void ledRed()
 {
     Serial.println(">>> ledRed()");
 
+    pinMode(LED_BLUE, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
     pinMode(LED_RED, OUTPUT);
 
-    digitalWrite(LED_RED, HIGH);
-    digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_GREEN, LOW);
 
-    Serial.print("GPIO RED = ");
+    digitalWrite(LED_RED, HIGH);
+
+    Serial.print("GPIO13 = ");
     Serial.println(digitalRead(LED_RED));
 }
 
@@ -105,18 +117,19 @@ void ledOrange()
 {
     Serial.println(">>> ledOrange()");
 
-    pinMode(LED_RED, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
     pinMode(LED_BLUE, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
+
+    digitalWrite(LED_BLUE, LOW);
 
     digitalWrite(LED_RED, HIGH);
     digitalWrite(LED_GREEN, HIGH);
-    digitalWrite(LED_BLUE, LOW);
 
-    Serial.print("GPIO RED = ");
+    Serial.print("GPIO13 = ");
     Serial.println(digitalRead(LED_RED));
 
-    Serial.print("GPIO GREEN = ");
+    Serial.print("GPIO12 = ");
     Serial.println(digitalRead(LED_GREEN));
 }
 
@@ -127,56 +140,65 @@ void ledOrange()
 
 void ledsTest()
 {
-    Serial.println(">>> ledsTest()");
+    Serial.println();
+    Serial.println("==============================");
+    Serial.println("TEST LEDS");
+    Serial.println("==============================");
 
     ledBlue();
-    delay(300);
+    delay(500);
 
     ledsOff();
-    delay(100);
+    delay(300);
 
     ledGreen();
-    delay(300);
+    delay(500);
 
     ledsOff();
-    delay(100);
+    delay(300);
 
     ledRed();
-    delay(300);
+    delay(500);
 
     ledsOff();
+    delay(300);
+
+    ledOrange();
+    delay(500);
+
+    ledsOff();
+
+    Serial.println("==============================");
+    Serial.println("TEST LEDS TERMINE");
+    Serial.println("==============================");
 }
 
 
 // ============================================================
-// RAINBOW
+// ARC-EN-CIEL
 // ============================================================
 
 void ledsRainbow()
 {
-    Serial.println(">>> ledsRainbow()");
-
     ledRed();
-    delay(200);
+    delay(500);
 
     ledGreen();
-    delay(200);
+    delay(500);
 
     ledBlue();
-    delay(200);
+    delay(500);
 
     ledsOff();
 }
 
 
 // ============================================================
-// VERT CLIGNOTANT 3 FOIS
+// CLIGNOTEMENT VERT
 // ============================================================
 
 void ledsGreenBlink3()
 {
-    Serial.println(">>> ledsGreenBlink3()");
-
     for (int i = 0; i < 3; i++)
     {
         ledGreen();
@@ -189,13 +211,11 @@ void ledsGreenBlink3()
 
 
 // ============================================================
-// ROUGE CLIGNOTANT 3 FOIS
+// CLIGNOTEMENT ROUGE
 // ============================================================
 
 void ledsRedBlink3()
 {
-    Serial.println(">>> ledsRedBlink3()");
-
     for (int i = 0; i < 3; i++)
     {
         ledRed();
@@ -213,59 +233,29 @@ void ledsRedBlink3()
 
 void ledsOrangeFade()
 {
-    Serial.println(">>> ledsOrangeFade()");
-
-    pinMode(LED_RED, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
     pinMode(LED_BLUE, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
 
-    for (
-        int brightness = 0;
-        brightness <= 255;
-        brightness += 5
-    )
+    digitalWrite(LED_BLUE, LOW);
+
+    for (int brightness = 0; brightness <= 255; brightness += 5)
     {
-        analogWrite(
-            LED_RED,
-            brightness
-        );
-
-        analogWrite(
-            LED_GREEN,
-            brightness / 2
-        );
-
-        digitalWrite(
-            LED_BLUE,
-            LOW
-        );
+        analogWrite(LED_RED, brightness);
+        analogWrite(LED_GREEN, brightness / 2);
 
         delay(20);
     }
 
-    for (
-        int brightness = 255;
-        brightness >= 0;
-        brightness -= 5
-    )
+    for (int brightness = 255; brightness >= 0; brightness -= 5)
     {
-        analogWrite(
-            LED_RED,
-            brightness
-        );
-
-        analogWrite(
-            LED_GREEN,
-            brightness / 2
-        );
-
-        digitalWrite(
-            LED_BLUE,
-            LOW
-        );
+        analogWrite(LED_RED, brightness);
+        analogWrite(LED_GREEN, brightness / 2);
 
         delay(20);
     }
 
-    ledsOff();
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_BLUE, LOW);
 }

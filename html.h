@@ -22,10 +22,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
 <title>FRIGO | 3x0c3t</title>
 
-<link
-    rel="stylesheet"
-    href="/style.css"
->
+<link rel="stylesheet" href="/style.css">
 
 </head>
 
@@ -33,325 +30,297 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
 <div class="app">
 
-    <!-- =====================================================
-         HEADER
-         ===================================================== -->
+<header class="header">
 
-    <header class="header">
+    <div class="brand">
 
-        <div class="brand">
-
-            <div class="brand-title">
-                🌡️ FRIGO
-            </div>
-
-            <div class="brand-subtitle">
-                3x0c3t · ESP8266
-            </div>
-
+        <div class="brand-title">
+            🌡️ FRIGO
         </div>
 
-        <nav class="links">
-
-            <a
-                href="https://3x0c3t.com"
-                target="_blank"
-                rel="noopener"
-            >
-                3x0c3t.com
-            </a>
-
-            <a
-                href="https://github.com/3x0c3t/3x0c3t_S0NDES_CONNECT-es"
-                target="_blank"
-                rel="noopener"
-            >
-                GitHub
-            </a>
-
-        </nav>
-
-    </header>
-
-
-    <!-- =====================================================
-         ETAT WIFI + SYSTEME
-         ===================================================== -->
-
-    <section class="system-grid">
-
-        <div class="panel status-panel">
-
-            <div class="panel-title">
-                📡 État Wi-Fi
-            </div>
-
-            <div
-                id="status"
-                class="status-content"
-            >
-                Connexion...
-            </div>
-
+        <div class="brand-subtitle">
+            3x0c3t · ESP8266
         </div>
 
+    </div>
 
-        <div class="panel reboot-panel">
+    <nav class="links">
 
-            <div class="panel-title">
-                ⚙️ Système
-            </div>
+        <a
+            href="https://3x0c3t.com"
+            target="_blank"
+            rel="noopener"
+        >
+            3x0c3t.com
+        </a>
 
-            <button
-                class="button button-danger"
-                onclick="rebootESP()"
-            >
-                🔄 Reboot ESP8266
-            </button>
+        <a
+            href="https://github.com/3x0c3t/3x0c3t_S0NDES_CONNECT-es"
+            target="_blank"
+            rel="noopener"
+        >
+            GitHub
+        </a>
 
-        </div>
+    </nav>
 
-    </section>
+</header>
 
 
-    <!-- =====================================================
-         PILOTAGE
-         ===================================================== -->
+<section class="system-grid">
 
-    <section class="panel control-panel">
+    <div class="panel status-panel">
 
         <div class="panel-title">
-            🎛️ Pilotage
+            📡 État Wi-Fi
         </div>
 
-        <div class="control-groups">
-
-            <div class="control-group">
-
-                <div class="control-label">
-                    💡 LEDs
-                </div>
-
-                <div class="button-row">
-
-                    <button
-                        class="button button-blue"
-                        onclick="led('blue')"
-                    >
-                        🔵 Bleu
-                    </button>
-
-                    <button
-                        class="button button-green"
-                        onclick="led('green')"
-                    >
-                        🟢 Vert
-                    </button>
-
-                    <button
-                        class="button button-red"
-                        onclick="led('red')"
-                    >
-                        🔴 Rouge
-                    </button>
-
-                    <button
-                        class="button button-orange"
-                        onclick="led('orange')"
-                    >
-                        🟠 Orange
-                    </button>
-
-                    <button
-                        class="button"
-                        onclick="led('off')"
-                    >
-                        ⚫ OFF
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="control-group">
-
-                <div class="control-label">
-                    🔊 Buzzer
-                </div>
-
-                <div class="button-row">
-
-                    <button
-                        class="button"
-                        onclick="buzzer('beep')"
-                    >
-                        🔔 Test
-                    </button>
-
-                    <button
-                        class="button"
-                        onclick="buzzer('success')"
-                    >
-                        ✅ Succès
-                    </button>
-
-                    <button
-                        class="button"
-                        onclick="buzzer('wifi')"
-                    >
-                        📡 Wi-Fi
-                    </button>
-
-                    <button
-                        class="button"
-                        onclick="buzzer('error')"
-                    >
-                        ⚠️ Erreur
-                    </button>
-
-                </div>
-
-            </div>
-
+        <div id="status" class="status-content">
+            Connexion...
         </div>
 
-    </section>
+    </div>
 
 
-    <!-- =====================================================
-         RAFRAICHISSEMENT
-         ===================================================== -->
-
-    <section class="panel refresh-panel">
+    <div class="panel reboot-panel">
 
         <div class="panel-title">
-            🔄 Rafraîchissement
+            ⚙️ Système
         </div>
 
-        <div class="refresh-control">
+        <button
+            class="button button-danger"
+            onclick="rebootESP()"
+        >
+            🔄 Reboot ESP8266
+        </button>
 
-            <label for="refreshInterval">
-                Fréquence de lecture des températures
-            </label>
+    </div>
 
-            <div class="refresh-input">
+</section>
 
-                <input
-                    id="refreshInterval"
-                    type="number"
-                    min="1"
-                    max="60"
-                    value="5"
+
+<section class="panel control-panel">
+
+    <div class="panel-title">
+        🎛️ Pilotage
+    </div>
+
+    <div class="control-groups">
+
+        <div class="control-group">
+
+            <div class="control-label">
+                💡 LEDs
+            </div>
+
+            <div class="button-row">
+
+                <button
+                    class="button button-blue"
+                    onclick="led('blue')"
                 >
+                    🔵 Bleu
+                </button>
 
-                <span>
-                    secondes
-                </span>
+                <button
+                    class="button button-green"
+                    onclick="led('green')"
+                >
+                    🟢 Vert
+                </button>
+
+                <button
+                    class="button button-red"
+                    onclick="led('red')"
+                >
+                    🔴 Rouge
+                </button>
+
+                <button
+                    class="button button-orange"
+                    onclick="led('orange')"
+                >
+                    🟠 Orange
+                </button>
 
                 <button
                     class="button"
-                    onclick="changeRefreshInterval()"
+                    onclick="led('off')"
                 >
-                    ✓ Appliquer
+                    ⚫ OFF
                 </button>
 
             </div>
 
         </div>
 
-    </section>
 
+        <div class="control-group">
 
-    <!-- =====================================================
-         SONDES & CONSIGNES
-         ===================================================== -->
-
-    <section class="panel sensors-panel">
-
-        <div class="sensors-heading">
-
-            <div>
-
-                <div class="panel-title">
-                    🌡️ Sondes & consignes
-                </div>
-
-                <div class="sensors-subtitle">
-                    Surveillance des températures
-                </div>
-
+            <div class="control-label">
+                🔊 Buzzer
             </div>
 
-            <div
-                id="sensorSummary"
-                class="sensor-summary"
-            >
-                --
+            <div class="button-row">
+
+                <button
+                    class="button"
+                    onclick="buzzer('beep')"
+                >
+                    🔔 Test
+                </button>
+
+                <button
+                    class="button"
+                    onclick="buzzer('success')"
+                >
+                    ✅ Succès
+                </button>
+
+                <button
+                    class="button"
+                    onclick="buzzer('wifi')"
+                >
+                    📡 Wi-Fi
+                </button>
+
+                <button
+                    class="button"
+                    onclick="buzzer('error')"
+                >
+                    ⚠️ Erreur
+                </button>
+
             </div>
 
         </div>
 
+    </div>
+
+</section>
+
+
+<section class="panel refresh-panel">
+
+    <div class="panel-title">
+        🔄 Rafraîchissement
+    </div>
+
+    <div class="refresh-control">
+
+        <label for="refreshInterval">
+            Fréquence de lecture des températures
+        </label>
+
+        <div class="refresh-input">
+
+            <input
+                id="refreshInterval"
+                type="number"
+                min="1"
+                max="60"
+                value="5"
+            >
+
+            <span>
+                secondes
+            </span>
+
+            <button
+                class="button"
+                onclick="changeRefreshInterval()"
+            >
+                ✓ Appliquer
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="panel sensors-panel">
+
+    <div class="sensors-heading">
+
+        <div>
+
+            <div class="panel-title">
+                🌡️ Sondes & consignes
+            </div>
+
+            <div class="sensors-subtitle">
+                Surveillance des températures
+            </div>
+
+        </div>
 
         <div
-            id="temperatures"
-            class="sensor-grid"
+            id="sensorSummary"
+            class="sensor-summary"
         >
+            --
+        </div>
 
-            <div class="sensor-card state-gray">
+    </div>
 
-                <div class="sensor-header">
 
-                    <div class="sensor-name">
-                        <span class="sensor-icon">
-                            🌡️
-                        </span>
-                        S1
-                    </div>
+    <div
+        id="temperatures"
+        class="sensor-grid"
+    >
 
-                    <div class="sensor-state">
-                        CHARGEMENT
-                    </div>
+        <div class="sensor-card state-gray">
 
+            <div class="sensor-header">
+
+                <div class="sensor-name">
+                    <span class="sensor-icon">
+                        🌡️
+                    </span>
+                    S1
                 </div>
 
-                <div class="sensor-temperature">
-
-                    <span class="sensor-temperature-value">
-                        --
-                    </span>
-
-                    <span class="sensor-temperature-unit">
-                        °C
-                    </span>
-
+                <div class="sensor-state">
+                    CHARGEMENT
                 </div>
+
+            </div>
+
+            <div class="sensor-temperature">
+
+                <span class="sensor-temperature-value">
+                    --
+                </span>
+
+                <span class="sensor-temperature-unit">
+                    °C
+                </span>
 
             </div>
 
         </div>
 
-    </section>
+    </div>
+
+</section>
 
 
-    <!-- =====================================================
-         FOOTER
-         ===================================================== -->
+<footer class="footer">
 
-    <footer class="footer">
+    <span>
+        3x0c3t_S0NDES_CONNECT-es
+    </span>
 
-        <span>
-            3x0c3t_S0NDES_CONNECT-es
-        </span>
+    <span>
+        v1.2-dev
+    </span>
 
-        <span>
-            v1.2-dev
-        </span>
-
-    </footer>
+</footer>
 
 </div>
-
 
 <script src="/script.js"></script>
 
