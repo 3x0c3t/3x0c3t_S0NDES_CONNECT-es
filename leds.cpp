@@ -3,7 +3,6 @@
 #include "bootscreen.h"
 #include <Arduino.h>
 
-
 void ledsInit()
 {
     pinMode(LED_BLUE, OUTPUT);
@@ -13,92 +12,114 @@ void ledsInit()
     ledsOff();
 }
 
-
 void ledsOff()
 {
-    analogWrite(LED_BLUE, 0);
-    analogWrite(LED_GREEN, 0);
-    analogWrite(LED_RED, 0);
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_RED, LOW);
 
     bootLedStatus(true);
 }
 
+void ledBlue()
+{
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_BLUE, HIGH);
+}
+
+void ledGreen()
+{
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_GREEN, HIGH);
+    digitalWrite(LED_BLUE, LOW);
+}
+
+void ledRed()
+{
+    digitalWrite(LED_RED, HIGH);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_BLUE, LOW);
+}
+
+void ledOrange()
+{
+    digitalWrite(LED_RED, HIGH);
+    digitalWrite(LED_GREEN, HIGH);
+    digitalWrite(LED_BLUE, LOW);
+}
 
 void ledsTest()
 {
-    analogWrite(LED_BLUE, 255);
+    ledBlue();
     delay(300);
-    analogWrite(LED_BLUE, 0);
 
-    analogWrite(LED_GREEN, 255);
+    ledGreen();
     delay(300);
-    analogWrite(LED_GREEN, 0);
 
-    analogWrite(LED_RED, 255);
+    ledRed();
     delay(300);
-    analogWrite(LED_RED, 0);
+
+    ledsOff();
 }
-
 
 void ledsRainbow()
 {
-    analogWrite(LED_RED, 255);
+    ledRed();
     delay(200);
 
-    analogWrite(LED_RED, 0);
-    analogWrite(LED_GREEN, 255);
+    ledGreen();
     delay(200);
 
-    analogWrite(LED_GREEN, 0);
-    analogWrite(LED_BLUE, 255);
+    ledBlue();
     delay(200);
 
-    analogWrite(LED_BLUE, 0);
+    ledsOff();
 }
-
 
 void ledsGreenBlink3()
 {
     for (int i = 0; i < 3; i++)
     {
-        analogWrite(LED_GREEN, 255);
+        ledGreen();
         delay(200);
 
-        analogWrite(LED_GREEN, 0);
+        ledsOff();
         delay(200);
     }
 }
-
 
 void ledsRedBlink3()
 {
     for (int i = 0; i < 3; i++)
     {
-        analogWrite(LED_RED, 255);
+        ledRed();
         delay(200);
 
-        analogWrite(LED_RED, 0);
+        ledsOff();
         delay(200);
     }
 }
 
-
 void ledsOrangeFade()
 {
-    // Orange = rouge + vert
-    // Fade IN
     for (int brightness = 0; brightness <= 255; brightness += 5)
     {
         analogWrite(LED_RED, brightness);
         analogWrite(LED_GREEN, brightness / 2);
+        digitalWrite(LED_BLUE, LOW);
+
         delay(20);
     }
 
-    // Fade OUT
     for (int brightness = 255; brightness >= 0; brightness -= 5)
     {
         analogWrite(LED_RED, brightness);
         analogWrite(LED_GREEN, brightness / 2);
+        digitalWrite(LED_BLUE, LOW);
+
         delay(20);
     }
+
+    ledsOff();
 }

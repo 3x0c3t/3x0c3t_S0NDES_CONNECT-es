@@ -155,31 +155,28 @@ void handleLED()
         return;
     }
 
-    String color = server.arg("color");
+    String color =
+        server.arg("color");
 
     if (color == "red")
     {
-        digitalWrite(LED_RED, HIGH);
-        digitalWrite(LED_GREEN, LOW);
-        digitalWrite(LED_BLUE, LOW);
+        ledRed();
     }
     else if (color == "green")
     {
-        digitalWrite(LED_RED, LOW);
-        digitalWrite(LED_GREEN, HIGH);
-        digitalWrite(LED_BLUE, LOW);
+        ledGreen();
     }
     else if (color == "blue")
     {
-        digitalWrite(LED_RED, LOW);
-        digitalWrite(LED_GREEN, LOW);
-        digitalWrite(LED_BLUE, HIGH);
+        ledBlue();
+    }
+    else if (color == "orange")
+    {
+        ledOrange();
     }
     else if (color == "off")
     {
-        digitalWrite(LED_RED, LOW);
-        digitalWrite(LED_GREEN, LOW);
-        digitalWrite(LED_BLUE, LOW);
+        ledsOff();
     }
     else
     {
@@ -217,23 +214,36 @@ void handleBuzzer()
         return;
     }
 
-    String action = server.arg("action");
+    String action =
+        server.arg("action");
 
     if (action == "on")
     {
-        digitalWrite(BUZZER_PIN, HIGH);
+        digitalWrite(
+            BUZZER_PIN,
+            HIGH
+        );
     }
     else if (action == "off")
     {
-        digitalWrite(BUZZER_PIN, LOW);
+        digitalWrite(
+            BUZZER_PIN,
+            LOW
+        );
     }
     else if (action == "beep")
     {
-        digitalWrite(BUZZER_PIN, HIGH);
+        digitalWrite(
+            BUZZER_PIN,
+            HIGH
+        );
 
         delay(150);
 
-        digitalWrite(BUZZER_PIN, LOW);
+        digitalWrite(
+            BUZZER_PIN,
+            LOW
+        );
     }
     else
     {
