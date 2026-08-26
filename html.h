@@ -2,6 +2,7 @@
 #define HTML_H
 
 const char HTML_PAGE[] PROGMEM = R"rawliteral(
+
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -21,7 +22,10 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
 <title>FRIGO | 3x0c3t</title>
 
-<link rel="stylesheet" href="/style.css">
+<link
+    rel="stylesheet"
+    href="/style.css"
+>
 
 </head>
 
@@ -29,9 +33,9 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
 <div class="app">
 
-    <!-- ======================================================
+    <!-- =====================================================
          HEADER
-         ====================================================== -->
+         ===================================================== -->
 
     <header class="header">
 
@@ -70,13 +74,13 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
     </header>
 
 
-    <!-- ======================================================
-         ETAT WIFI + REBOOT
-         ====================================================== -->
+    <!-- =====================================================
+         ETAT WIFI + SYSTEME
+         ===================================================== -->
 
     <section class="system-grid">
 
-        <div class="panel">
+        <div class="panel status-panel">
 
             <div class="panel-title">
                 📡 État Wi-Fi
@@ -92,15 +96,14 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
         </div>
 
 
-        <div class="panel system-panel">
+        <div class="panel reboot-panel">
 
             <div class="panel-title">
                 ⚙️ Système
             </div>
 
             <button
-                class="button button-danger reboot-button"
-                type="button"
+                class="button button-danger"
                 onclick="rebootESP()"
             >
                 🔄 Reboot ESP8266
@@ -111,19 +114,17 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
     </section>
 
 
-    <!-- ======================================================
+    <!-- =====================================================
          PILOTAGE
-         ====================================================== -->
+         ===================================================== -->
 
-    <section class="panel">
+    <section class="panel control-panel">
 
         <div class="panel-title">
             🎛️ Pilotage
         </div>
 
         <div class="control-groups">
-
-            <!-- LEDS -->
 
             <div class="control-group">
 
@@ -135,7 +136,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button button-blue"
-                        type="button"
                         onclick="led('blue')"
                     >
                         🔵 Bleu
@@ -143,7 +143,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button button-green"
-                        type="button"
                         onclick="led('green')"
                     >
                         🟢 Vert
@@ -151,7 +150,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button button-red"
-                        type="button"
                         onclick="led('red')"
                     >
                         🔴 Rouge
@@ -159,7 +157,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button button-orange"
-                        type="button"
                         onclick="led('orange')"
                     >
                         🟠 Orange
@@ -167,7 +164,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button"
-                        type="button"
                         onclick="led('off')"
                     >
                         ⚫ OFF
@@ -177,8 +173,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
             </div>
 
-
-            <!-- BUZZER -->
 
             <div class="control-group">
 
@@ -190,7 +184,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button"
-                        type="button"
                         onclick="buzzer('beep')"
                     >
                         🔔 Test
@@ -198,7 +191,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button"
-                        type="button"
                         onclick="buzzer('success')"
                     >
                         ✅ Succès
@@ -206,7 +198,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button"
-                        type="button"
                         onclick="buzzer('wifi')"
                     >
                         📡 Wi-Fi
@@ -214,7 +205,6 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                     <button
                         class="button"
-                        type="button"
                         onclick="buzzer('error')"
                     >
                         ⚠️ Erreur
@@ -229,40 +219,30 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
     </section>
 
 
-    <!-- ======================================================
-         REGLAGES AFFICHAGE
-         ====================================================== -->
+    <!-- =====================================================
+         RAFRAICHISSEMENT
+         ===================================================== -->
 
     <section class="panel refresh-panel">
 
-        <div class="refresh-settings">
+        <div class="panel-title">
+            🔄 Rafraîchissement
+        </div>
 
-            <div>
+        <div class="refresh-control">
 
-                <div class="panel-title">
-                    🔄 Rafraîchissement
-                </div>
+            <label for="refreshInterval">
+                Fréquence de lecture des températures
+            </label>
 
-                <div class="refresh-description">
-                    Fréquence de lecture des températures
-                </div>
-
-            </div>
-
-            <div class="refresh-control">
-
-                <label for="refreshInterval">
-                    Intervalle
-                </label>
+            <div class="refresh-input">
 
                 <input
                     id="refreshInterval"
                     type="number"
                     min="1"
                     max="60"
-                    step="1"
-                    value="2"
-                    inputmode="numeric"
+                    value="5"
                 >
 
                 <span>
@@ -271,8 +251,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
                 <button
                     class="button"
-                    type="button"
-                    onclick="applyRefreshInterval()"
+                    onclick="changeRefreshInterval()"
                 >
                     ✓ Appliquer
                 </button>
@@ -284,15 +263,35 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
     </section>
 
 
-    <!-- ======================================================
+    <!-- =====================================================
          SONDES
-         ====================================================== -->
+         ===================================================== -->
 
     <section class="panel sensors-panel">
 
-        <div class="panel-title">
-            🌡️ Sondes & consignes
+        <div class="sensors-heading">
+
+            <div>
+
+                <div class="panel-title">
+                    🌡️ Sondes & consignes
+                </div>
+
+                <div class="sensors-subtitle">
+                    Surveillance des températures
+                </div>
+
+            </div>
+
+            <div
+                id="sensorSummary"
+                class="sensor-summary"
+            >
+                --
+            </div>
+
         </div>
+
 
         <div
             id="temperatures"
@@ -304,9 +303,9 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
     </section>
 
 
-    <!-- ======================================================
+    <!-- =====================================================
          FOOTER
-         ====================================================== -->
+         ===================================================== -->
 
     <footer class="footer">
 
@@ -328,6 +327,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 </body>
 
 </html>
+
 )rawliteral";
 
 #endif

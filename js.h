@@ -9,17 +9,29 @@ const char JS_PAGE[] PROGMEM = R"rawliteral(
 
 async function api(url)
 {
-    const response = await fetch(
-        url + "?t=" + Date.now(),
-        {
-            method: "GET",
-            cache: "no-store"
-        }
-    );
+    const separator =
+        url.includes("?")
+            ? "&"
+            : "?";
+
+    const response =
+        await fetch(
+            url +
+            separator +
+            "t=" +
+            Date.now(),
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
 
     if (!response.ok)
     {
-        throw new Error("HTTP " + response.status);
+        throw new Error(
+            "HTTP " +
+            response.status
+        );
     }
 
     return await response.json();
@@ -27,16 +39,22 @@ async function api(url)
 
 
 /* ============================================================
-   ÉTAT
+   ETAT WIFI
    ============================================================ */
 
 async function updateStatus()
 {
     try
     {
-        const data = await api("/api/status");
+        const data =
+            await api(
+                "/api/status"
+            );
 
-        const element = document.getElementById("status");
+        const element =
+            document.getElementById(
+                "status"
+            );
 
         if (!element)
         {
@@ -47,8 +65,8 @@ async function updateStatus()
             "<p>WiFi : " +
             (
                 data.wifi
-                ? '<span class="ok">CONNECTÉ</span>'
-                : '<span class="error">ERREUR</span>'
+                    ? '<span class="ok">CONNECTÉ</span>'
+                    : '<span class="error">ERREUR</span>'
             ) +
             "</p>" +
 
@@ -65,7 +83,9 @@ async function updateStatus()
             " dBm</p>" +
 
             "<p>Uptime : " +
-            Math.floor((data.uptime || 0) / 1000) +
+            Math.floor(
+                (data.uptime || 0) / 1000
+            ) +
             " s</p>";
     }
     catch (error)
@@ -76,7 +96,9 @@ async function updateStatus()
         );
 
         const element =
-            document.getElementById("status");
+            document.getElementById(
+                "status"
+            );
 
         if (element)
         {
@@ -90,7 +112,145 @@ async function updateStatus()
 
 
 /* ============================================================
-   TEMPÉRATURES
+   CONSIGNES
+   ============================================================ */
+
+const DEFAULT_SETPOINT = 25.0;
+
+function getSetpoint(index)
+{
+    const stored =
+        localStorage.getItem(
+            "sensorSetpoint_" +
+            index
+        );
+
+    if (stored === null)
+    {
+        return DEFAULT_SETPOINT;
+    }
+
+    const value =
+        Number(stored);
+
+    if (!Number.isFinite(value))
+    {
+        return DEFAULT_SETPOINT;
+    }
+
+    return value;
+}
+
+
+function saveSetpoint(
+    index,
+    value
+)
+{
+    let temperature =
+        Number(value);
+
+    if (!Number.isFinite(temperature))
+    {
+        temperature =
+            DEFAULT_SETPOINT;
+    }
+
+    if (temperature < -55)
+    {
+        temperature = -55;
+    }
+
+    if (temperature > 125)
+    {
+        temperature = 125;
+    }
+
+    temperature =
+        Math.round(
+            temperature * 10
+        ) / 10;
+
+    localStorage.setItem(
+        "sensorSetpoint_" +
+        index,
+        temperature
+    );
+
+    return temperature;
+}
+
+
+function changeSetpoint(
+    index,
+    delta
+)
+{
+    const current =
+        getSetpoint(index);
+
+    const value =
+        saveSetpoint(
+            index,
+            current + delta
+        );
+
+    updateTemperatures();
+}
+
+
+/* ============================================================
+   ETAT D'UNE SONDE
+   ============================================================ */
+
+function getSensorState(
+    temperature,
+    setpoint
+)
+{
+    if (
+        !Number.isFinite(
+            temperature
+        )
+    )
+    {
+        return {
+            className: "state-gray",
+            label: "INDISPONIBLE"
+        };
+    }
+
+    const difference =
+        Math.abs(
+            temperature -
+            setpoint
+        );
+
+    if (difference >= 3)
+    {
+        return {
+            className: "state-red",
+            label: "ALERTE"
+        };
+    }
+
+    if (difference >= 1)
+    {
+        return {
+            className: "state-orange",
+            label: "ATTENTION"
+        };
+    }
+
+    return {
+        className: "state-green",
+        label: "NORMAL"
+    };
+}
+
+
+/* ============================================================
+   TEMPERATURES
    ============================================================ */
 
 async function updateTemperatures()
@@ -98,14 +258,16 @@ async function updateTemperatures()
     try
     {
         const data =
-            await api("/api/temperatures");
+            await api(
+                "/api/temperatures"
+            );
 
-        if (!data)
-        {
-            throw new Error("Réponse vide");
-        }
-
-        if (!Array.isArray(data.temperatures))
+        if (
+            !data ||
+            !Array.isArray(
+                data.temperatures
+            )
+        )
         {
             throw new Error(
                 "Format JSON températures invalide"
@@ -113,7 +275,9 @@ async function updateTemperatures()
         }
 
         const element =
-            document.getElementById("temperatures");
+            document.getElementById(
+                "temperatures"
+            );
 
         if (!element)
         {
@@ -122,6 +286,10 @@ async function updateTemperatures()
 
         let html = "";
 
+        let normalCount = 0;
+        let warningCount = 0;
+        let alertCount = 0;
+
         for (
             let i = 0;
             i < data.temperatures.length;
@@ -129,24 +297,206 @@ async function updateTemperatures()
         )
         {
             const temperature =
-                Number(data.temperatures[i]);
+                Number(
+                    data.temperatures[i]
+                );
 
-            const value =
-                Number.isFinite(temperature)
-                ? temperature.toFixed(2)
-                : "--";
+            const setpoint =
+                getSetpoint(i);
+
+            const state =
+                getSensorState(
+                    temperature,
+                    setpoint
+                );
+
+            if (
+                state.className ===
+                "state-green"
+            )
+            {
+                normalCount++;
+            }
+            else if (
+                state.className ===
+                "state-orange"
+            )
+            {
+                warningCount++;
+            }
+            else if (
+                state.className ===
+                "state-red"
+            )
+            {
+                alertCount++;
+            }
+
+            const validTemperature =
+                Number.isFinite(
+                    temperature
+                );
+
+            const temperatureText =
+                validTemperature
+                    ? temperature.toFixed(2)
+                    : "--";
+
+            const difference =
+                validTemperature
+                    ? temperature - setpoint
+                    : 0;
+
+            const differenceText =
+                validTemperature
+                    ? (
+                        difference > 0
+                            ? "+"
+                            : ""
+                    ) +
+                    difference.toFixed(2) +
+                    " °C"
+                    : "--";
+
+            const differenceAbsolute =
+                validTemperature
+                    ? Math.abs(
+                        difference
+                    )
+                    : 0;
+
+            const barWidth =
+                Math.min(
+                    100,
+                    Math.max(
+                        3,
+                        differenceAbsolute /
+                        3 *
+                        100
+                    )
+                );
 
             html +=
-                '<div class="temperature">' +
-                "<strong>S" +
-                (i + 1) +
-                "</strong> : " +
-                value +
-                " °C" +
-                "</div>";
+                '<article class="sensor-card ' +
+                state.className +
+                '">' +
+
+                    '<div class="sensor-header">' +
+
+                        '<div class="sensor-name">' +
+
+                            '<span class="sensor-icon">' +
+                            "🌡️" +
+                            "</span>" +
+
+                            "S" +
+                            (i + 1) +
+
+                        "</div>" +
+
+                        '<div class="sensor-state">' +
+                        state.label +
+                        "</div>" +
+
+                    "</div>" +
+
+
+                    '<div class="sensor-temperature">' +
+
+                        '<span class="sensor-temperature-value">' +
+                        temperatureText +
+                        "</span>" +
+
+                        '<span class="sensor-temperature-unit">' +
+                        "°C" +
+                        "</span>" +
+
+                    "</div>" +
+
+
+                    '<div class="sensor-difference">' +
+
+                        "<span>Écart à la consigne</span>" +
+
+                        "<strong>" +
+                        differenceText +
+                        "</strong>" +
+
+                    "</div>" +
+
+
+                    '<div class="sensor-bar">' +
+
+                        '<div ' +
+                        'class="sensor-bar-fill" ' +
+                        'style="width:' +
+                        barWidth +
+                        '%"' +
+                        "></div>" +
+
+                    "</div>" +
+
+
+                    '<div class="sensor-setpoint">' +
+
+                        '<div class="sensor-setpoint-label">' +
+                        "CONSIGNE" +
+                        "</div>" +
+
+                        '<div class="setpoint-control">' +
+
+                            '<button ' +
+                            'class="setpoint-button" ' +
+                            'type="button" ' +
+                            'onclick="changeSetpoint(' +
+                            i +
+                            ', -0.5)"' +
+                            ">" +
+                            "−" +
+                            "</button>" +
+
+                            '<input ' +
+                            'class="setpoint-input" ' +
+                            'id="setpoint_' +
+                            i +
+                            '" ' +
+                            'type="number" ' +
+                            'step="0.5" ' +
+                            'min="-55" ' +
+                            'max="125" ' +
+                            'value="' +
+                            setpoint.toFixed(1) +
+                            '" ' +
+                            'onchange="setSensorSetpoint(' +
+                            i +
+                            ', this.value)"' +
+                            ">" +
+
+                            '<button ' +
+                            'class="setpoint-button" ' +
+                            'type="button" ' +
+                            'onclick="changeSetpoint(' +
+                            i +
+                            ', 0.5)"' +
+                            ">" +
+                            "+" +
+                            "</button>" +
+
+                        "</div>" +
+
+                    "</div>" +
+
+                "</article>";
         }
 
-        element.innerHTML = html;
+        element.innerHTML =
+            html;
+
+        updateSensorSummary(
+            normalCount,
+            warningCount,
+            alertCount
+        );
     }
     catch (error)
     {
@@ -156,7 +506,9 @@ async function updateTemperatures()
         );
 
         const element =
-            document.getElementById("temperatures");
+            document.getElementById(
+                "temperatures"
+            );
 
         if (element)
         {
@@ -170,16 +522,133 @@ async function updateTemperatures()
 
 
 /* ============================================================
+   RESUME DES SONDES
+   ============================================================ */
+
+function updateSensorSummary(
+    normal,
+    warning,
+    alert
+)
+{
+    const element =
+        document.getElementById(
+            "sensorSummary"
+        );
+
+    if (!element)
+    {
+        return;
+    }
+
+    const total =
+        normal +
+        warning +
+        alert;
+
+    if (total === 0)
+    {
+        element.textContent =
+            "--";
+
+        return;
+    }
+
+    if (alert > 0)
+    {
+        element.innerHTML =
+            '<span class="error">' +
+            alert +
+            " alerte" +
+            (
+                alert > 1
+                    ? "s"
+                    : ""
+            ) +
+            "</span>";
+        return;
+    }
+
+    if (warning > 0)
+    {
+        element.innerHTML =
+            '<span style="color:#f59e0b">' +
+            warning +
+            " attention" +
+            (
+                warning > 1
+                    ? "s"
+                    : ""
+            ) +
+            "</span>";
+        return;
+    }
+
+    element.innerHTML =
+        '<span class="ok">' +
+        normal +
+        " sonde" +
+        (
+            normal > 1
+                ? "s"
+                : ""
+        ) +
+        " normale" +
+        (
+            normal > 1
+                ? "s"
+                : ""
+        ) +
+        "</span>";
+}
+
+
+/* ============================================================
+   MODIFICATION CONSIGNE
+   ============================================================ */
+
+function setSensorSetpoint(
+    index,
+    value
+)
+{
+    const input =
+        document.getElementById(
+            "setpoint_" +
+            index
+        );
+
+    const temperature =
+        saveSetpoint(
+            index,
+            value
+        );
+
+    if (input)
+    {
+        input.value =
+            temperature.toFixed(1);
+    }
+
+    updateTemperatures();
+}
+
+
+/* ============================================================
    LED
    ============================================================ */
 
-async function led(color)
+async function led(
+    color
+)
 {
     try
     {
         await api(
             "/api/led?color=" +
-            encodeURIComponent(color)
+            encodeURIComponent(
+                color
+            )
         );
     }
     catch (error)
@@ -196,13 +665,17 @@ async function led(color)
    BUZZER
    ============================================================ */
 
-async function buzzer(action)
+async function buzzer(
+    action
+)
 {
     try
     {
         await api(
             "/api/buzzer?action=" +
-            encodeURIComponent(action)
+            encodeURIComponent(
+                action
+            )
         );
     }
     catch (error)
@@ -232,7 +705,9 @@ async function reboot()
 
     try
     {
-        await api("/api/reboot");
+        await api(
+            "/api/reboot"
+        );
     }
     catch (error)
     {
@@ -244,7 +719,9 @@ async function reboot()
     }
 
     const element =
-        document.getElementById("status");
+        document.getElementById(
+            "status"
+        );
 
     if (element)
     {
@@ -256,9 +733,10 @@ async function reboot()
 }
 
 
-/*
- * Compatibilité avec l'ancien HTML
- */
+/* ============================================================
+   COMPATIBILITE
+   ============================================================ */
+
 function rebootESP()
 {
     reboot();
@@ -266,17 +744,13 @@ function rebootESP()
 
 
 /* ============================================================
-   INTERVALLE DE RAFRAÎCHISSEMENT
+   RAFRAICHISSEMENT
    ============================================================ */
 
 let refreshInterval = 5;
 let refreshTimer = null;
 let refreshBusy = false;
 
-
-/* ============================================================
-   LECTURE DE L'INTERVALLE
-   ============================================================ */
 
 function getRefreshInterval()
 {
@@ -291,9 +765,14 @@ function getRefreshInterval()
     }
 
     let value =
-        parseInt(element.value, 10);
+        parseInt(
+            element.value,
+            10
+        );
 
-    if (!Number.isFinite(value))
+    if (
+        !Number.isFinite(value)
+    )
     {
         value = 5;
     }
@@ -312,15 +791,8 @@ function getRefreshInterval()
 }
 
 
-/* ============================================================
-   RAFRAÎCHISSEMENT COMPLET
-   ============================================================ */
-
 async function refreshAll()
 {
-    /*
-     * Empêche plusieurs cycles simultanés.
-     */
     if (refreshBusy)
     {
         return;
@@ -330,16 +802,16 @@ async function refreshAll()
 
     try
     {
-        /*
-         * IMPORTANT :
-         * Les deux requêtes sont séquentielles.
-         * Pas de bombardement simultané de l'ESP.
-         */
-
         await updateStatus();
 
         await new Promise(
-            resolve => setTimeout(resolve, 50)
+            function(resolve)
+            {
+                setTimeout(
+                    resolve,
+                    50
+                );
+            }
         );
 
         await updateTemperatures();
@@ -351,15 +823,15 @@ async function refreshAll()
 }
 
 
-/* ============================================================
-   TIMER
-   ============================================================ */
-
 function startRefreshTimer()
 {
-    if (refreshTimer !== null)
+    if (
+        refreshTimer !== null
+    )
     {
-        clearTimeout(refreshTimer);
+        clearTimeout(
+            refreshTimer
+        );
     }
 
     refreshInterval =
@@ -375,185 +847,76 @@ function startRefreshTimer()
         refreshTimer =
             setTimeout(
                 loop,
-                refreshInterval * 1000
+                refreshInterval *
+                1000
             );
     }
 
     refreshTimer =
         setTimeout(
             loop,
-            refreshInterval * 1000
+            refreshInterval *
+            1000
         );
 }
 
-
-/* ============================================================
-   CHANGEMENT INTERVALLE
-   ============================================================ */
 
 function changeRefreshInterval()
 {
     refreshInterval =
         getRefreshInterval();
 
+    localStorage.setItem(
+        "refreshInterval",
+        refreshInterval
+    );
+
     startRefreshTimer();
 }
 
 
 /* ============================================================
-   CONSIGNES
+   RESTAURATION INTERVALLE
    ============================================================ */
 
-const sensorSetpoints = {};
-
-
-function getSensorSetpoint(index)
+function restoreRefreshInterval()
 {
-    const key =
-        "sensorSetpoint_" +
-        index;
-
     const stored =
-        localStorage.getItem(key);
+        localStorage.getItem(
+            "refreshInterval"
+        );
 
     if (stored === null)
-    {
-        return "";
-    }
-
-    return stored;
-}
-
-
-function setSensorSetpoint(index)
-{
-    const input =
-        document.getElementById(
-            "setpoint_" + index
-        );
-
-    if (!input)
-    {
-        return;
-    }
-
-    let value =
-        parseFloat(input.value);
-
-    if (!Number.isFinite(value))
-    {
-        localStorage.removeItem(
-            "sensorSetpoint_" + index
-        );
-
-        return;
-    }
-
-    /*
-     * Limites raisonnables pour éviter
-     * les joyeusetés du genre 384729 °C.
-     */
-
-    if (value < -55)
-    {
-        value = -55;
-    }
-
-    if (value > 125)
-    {
-        value = 125;
-    }
-
-    input.value =
-        value.toFixed(1);
-
-    localStorage.setItem(
-        "sensorSetpoint_" + index,
-        value
-    );
-
-    updateSetpointDisplay(index);
-}
-
-
-function updateSetpointDisplay(index)
-{
-    const input =
-        document.getElementById(
-            "setpoint_" + index
-        );
-
-    if (!input)
     {
         return;
     }
 
     const value =
-        parseFloat(input.value);
+        Number(stored);
 
-    const display =
-        document.getElementById(
-            "setpointDisplay_" + index
-        );
-
-    if (!display)
+    if (
+        !Number.isFinite(value)
+    )
     {
         return;
     }
 
-    if (Number.isFinite(value))
-    {
-        display.textContent =
-            value.toFixed(1) +
-            " °C";
-    }
-    else
-    {
-        display.textContent =
-            "Aucune consigne";
-    }
-}
-
-
-function restoreSetpoints()
-{
-    const inputs =
-        document.querySelectorAll(
-            '[id^="setpoint_"]'
+    const input =
+        document.getElementById(
+            "refreshInterval"
         );
 
-    inputs.forEach(
-        function(input)
-        {
-            const id =
-                input.id;
-
-            const index =
-                parseInt(
-                    id.replace(
-                        "setpoint_",
-                        ""
-                    ),
-                    10
-                );
-
-            if (!Number.isFinite(index))
-            {
-                return;
-            }
-
-            const value =
-                getSensorSetpoint(index);
-
-            if (value !== "")
-            {
-                input.value =
-                    Number(value).toFixed(1);
-            }
-
-            updateSetpointDisplay(index);
-        }
-    );
+    if (input)
+    {
+        input.value =
+            Math.min(
+                60,
+                Math.max(
+                    1,
+                    value
+                )
+            );
+    }
 }
 
 
@@ -563,19 +926,10 @@ function restoreSetpoints()
 
 async function init()
 {
-    /*
-     * Premier affichage.
-     */
+    restoreRefreshInterval();
+
     await refreshAll();
 
-    /*
-     * Restaurer les consignes locales.
-     */
-    restoreSetpoints();
-
-    /*
-     * Démarrer UNE SEULE boucle.
-     */
     startRefreshTimer();
 }
 
