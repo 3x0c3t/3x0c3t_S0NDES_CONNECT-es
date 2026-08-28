@@ -110,50 +110,47 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
 
         <div class="control-group">
 
-            <div class="control-label">
-                💡 LEDs
-            </div>
+    <div class="control-label">
+        💡 LEDs
+    </div>
 
-            <div class="button-row">
+    <div class="button-row">
 
-                <button
-                    class="button button-blue"
-                    onclick="led('blue')"
-                >
-                    🔵 Bleu
-                </button>
+        <button
+            class="button button-blue"
+            type="button"
+            onclick="led('blue')"
+        >
+            🔵 Bleu
+        </button>
 
-                <button
-                    class="button button-green"
-                    onclick="led('green')"
-                >
-                    🟢 Vert
-                </button>
+        <button
+            class="button button-green"
+            type="button"
+            onclick="led('green')"
+        >
+            🟢 Vert
+        </button>
 
-                <button
-                    class="button button-red"
-                    onclick="led('red')"
-                >
-                    🔴 Rouge
-                </button>
+        <button
+            class="button button-red"
+            type="button"
+            onclick="led('red')"
+        >
+            🔴 Rouge
+        </button>
 
-                <button
-                    class="button button-orange"
-                    onclick="led('orange')"
-                >
-                    🟠 Orange
-                </button>
+        <button
+            class="button"
+            type="button"
+            onclick="led('off')"
+        >
+            ⚫ OFF
+        </button>
 
-                <button
-                    class="button"
-                    onclick="led('off')"
-                >
-                    ⚫ OFF
-                </button>
+    </div>
 
-            </div>
-
-        </div>
+</div>
 
 
         <div class="control-group">

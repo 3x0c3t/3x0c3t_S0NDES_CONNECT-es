@@ -11,11 +11,6 @@
 
 void ledsInit()
 {
-    Serial.println();
-    Serial.println("==============================");
-    Serial.println("INITIALISATION LEDS");
-    Serial.println("==============================");
-
     pinMode(LED_BLUE, OUTPUT);
     pinMode(LED_GREEN, OUTPUT);
     pinMode(LED_RED, OUTPUT);
@@ -24,10 +19,7 @@ void ledsInit()
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_RED, LOW);
 
-    Serial.println("LED BLEUE  : GPIO14");
-    Serial.println("LED VERTE  : GPIO12");
-    Serial.println("LED ROUGE  : GPIO13");
-    Serial.println("LEDS OFF");
+    Serial.println("LEDS INIT");
 }
 
 
@@ -40,6 +32,8 @@ void ledsOff()
     digitalWrite(LED_BLUE, LOW);
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_RED, LOW);
+
+    Serial.println("LEDS OFF");
 }
 
 
@@ -49,12 +43,14 @@ void ledsOff()
 
 void ledBlue()
 {
+    Serial.println("LED BLEUE");
+
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_RED, LOW);
 
     digitalWrite(LED_BLUE, HIGH);
 
-    Serial.print("LED BLEUE : GPIO14 = ");
+    Serial.print("GPIO14 = ");
     Serial.println(digitalRead(LED_BLUE));
 }
 
@@ -65,12 +61,14 @@ void ledBlue()
 
 void ledGreen()
 {
+    Serial.println("LED VERTE");
+
     digitalWrite(LED_BLUE, LOW);
     digitalWrite(LED_RED, LOW);
 
     digitalWrite(LED_GREEN, HIGH);
 
-    Serial.print("LED VERTE : GPIO12 = ");
+    Serial.print("GPIO12 = ");
     Serial.println(digitalRead(LED_GREEN));
 }
 
@@ -81,12 +79,14 @@ void ledGreen()
 
 void ledRed()
 {
+    Serial.println("LED ROUGE");
+
     digitalWrite(LED_BLUE, LOW);
     digitalWrite(LED_GREEN, LOW);
 
     digitalWrite(LED_RED, HIGH);
 
-    Serial.print("LED ROUGE : GPIO13 = ");
+    Serial.print("GPIO13 = ");
     Serial.println(digitalRead(LED_RED));
 }
 
@@ -99,7 +99,7 @@ void ledsTest()
 {
     Serial.println();
     Serial.println("==============================");
-    Serial.println("TEST LED DIRECT");
+    Serial.println("TEST LEDS");
     Serial.println("==============================");
 
 
@@ -107,136 +107,107 @@ void ledsTest()
     // BLEU
     // --------------------------------------------------------
 
-    Serial.println();
-    Serial.println("------------------------------");
     Serial.println("LED BLEUE");
-    Serial.println("------------------------------");
-
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
-    pinMode(LED_RED, OUTPUT);
 
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_RED, LOW);
-    digitalWrite(LED_BLUE, LOW);
-
-    delay(500);
-
-    digitalWrite(LED_BLUE, HIGH);
-
-    Serial.print("GPIO14 = ");
-    Serial.println(digitalRead(LED_BLUE));
-
-    delay(3000);
 
     digitalWrite(LED_BLUE, LOW);
 
     Serial.println("GPIO14 LOW");
+
+    delay(1000);
+
+    digitalWrite(LED_BLUE, HIGH);
+
+    Serial.println("GPIO14 HIGH");
+
+    delay(2000);
+
+    digitalWrite(LED_BLUE, LOW);
+
+    delay(500);
 
 
     // --------------------------------------------------------
     // VERT
     // --------------------------------------------------------
 
-    Serial.println();
-    Serial.println("------------------------------");
     Serial.println("LED VERTE");
-    Serial.println("------------------------------");
 
     digitalWrite(LED_BLUE, LOW);
     digitalWrite(LED_RED, LOW);
+
     digitalWrite(LED_GREEN, HIGH);
 
-    Serial.print("GPIO12 = ");
-    Serial.println(digitalRead(LED_GREEN));
-
-    delay(1000);
+    delay(500);
 
     digitalWrite(LED_GREEN, LOW);
+
+    delay(500);
 
 
     // --------------------------------------------------------
     // ROUGE
     // --------------------------------------------------------
 
-    Serial.println();
-    Serial.println("------------------------------");
     Serial.println("LED ROUGE");
-    Serial.println("------------------------------");
 
     digitalWrite(LED_BLUE, LOW);
     digitalWrite(LED_GREEN, LOW);
+
     digitalWrite(LED_RED, HIGH);
 
-    Serial.print("GPIO13 = ");
-    Serial.println(digitalRead(LED_RED));
-
-    delay(1000);
+    delay(500);
 
     digitalWrite(LED_RED, LOW);
 
 
-    // --------------------------------------------------------
-    // FIN
-    // --------------------------------------------------------
-
-    ledsOff();
-
-    Serial.println();
     Serial.println("==============================");
-    Serial.println("TEST LED TERMINE");
+    Serial.println("FIN TEST LEDS");
     Serial.println("==============================");
 }
 
 
 // ============================================================
-// ARC-EN-CIEL
-// ============================================================
-
-void ledsRainbow()
-{
-    ledRed();
-    delay(500);
-
-    ledGreen();
-    delay(500);
-
-    ledBlue();
-    delay(500);
-
-    ledsOff();
-}
-
-
-// ============================================================
-// VERT CLIGNOTEMENT x3
+// VERT : 3 CLIGNOTEMENTS
 // ============================================================
 
 void ledsGreenBlink3()
 {
     for (int i = 0; i < 3; i++)
     {
-        ledGreen();
-        delay(250);
+        digitalWrite(LED_BLUE, LOW);
+        digitalWrite(LED_RED, LOW);
 
-        ledsOff();
-        delay(250);
+        digitalWrite(LED_GREEN, HIGH);
+
+        delay(200);
+
+        digitalWrite(LED_GREEN, LOW);
+
+        delay(200);
     }
 }
 
 
 // ============================================================
-// ROUGE CLIGNOTEMENT x3
+// ROUGE : 3 CLIGNOTEMENTS
 // ============================================================
 
 void ledsRedBlink3()
 {
     for (int i = 0; i < 3; i++)
     {
-        ledRed();
-        delay(250);
+        digitalWrite(LED_BLUE, LOW);
+        digitalWrite(LED_GREEN, LOW);
 
-        ledsOff();
-        delay(250);
+        digitalWrite(LED_RED, HIGH);
+
+        delay(200);
+
+        digitalWrite(LED_RED, LOW);
+
+        delay(200);
     }
 }

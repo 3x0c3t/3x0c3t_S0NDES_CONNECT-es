@@ -8,10 +8,9 @@
 #include "css.h"
 #include "js.h"
 
-#include "settings.h"
-#include "temperature.h"
 #include "leds.h"
 #include "buzzer.h"
+#include "temperature.h"
 
 
 // ============================================================
@@ -27,6 +26,8 @@ ESP8266WebServer server(80);
 
 void handleRoot()
 {
+    Serial.println("HTTP GET /");
+
     server.send_P(
         200,
         "text/html",
@@ -41,6 +42,8 @@ void handleRoot()
 
 void handleCSS()
 {
+    Serial.println("HTTP GET /style.css");
+
     server.send_P(
         200,
         "text/css",
@@ -55,6 +58,8 @@ void handleCSS()
 
 void handleJS()
 {
+    Serial.println("HTTP GET /script.js");
+
     server.send_P(
         200,
         "application/javascript",
@@ -64,7 +69,7 @@ void handleJS()
 
 
 // ============================================================
-// STATUS
+// STATUS WIFI
 // ============================================================
 
 void handleStatus()
@@ -103,7 +108,7 @@ void handleStatus()
 
 
 // ============================================================
-// TEMPERATURES
+// TEMPÉRATURES
 // ============================================================
 
 void handleTemperatures()
@@ -144,31 +149,47 @@ void handleTemperatures()
 
 void handleLED()
 {
+    Serial.println();
+    Serial.println("==============================");
+    Serial.println("HTTP LED REQUEST");
+    Serial.println("==============================");
+
     if (!server.hasArg("color"))
     {
+        Serial.println("ERREUR : argument color absent");
+
         server.send(
             400,
             "application/json",
             "{\"ok\":false,\"error\":\"missing color\"}"
         );
 
+        Serial.println("==============================");
+        Serial.println("FIN HTTP LED");
+        Serial.println("==============================");
+
         return;
     }
 
-
     String color = server.arg("color");
+
+    color.toLowerCase();
 
     Serial.print("API LED : ");
     Serial.println(color);
 
 
     // --------------------------------------------------------
-    // ROUGE
+    // BLEU
     // --------------------------------------------------------
 
-    if (color == "red")
+    if (color == "blue")
     {
-        ledRed();
+        Serial.println("COMMAND : BLUE");
+
+        ledBlue();
+
+        Serial.println("BLUE TERMINE");
     }
 
 
@@ -178,27 +199,25 @@ void handleLED()
 
     else if (color == "green")
     {
+        Serial.println("COMMAND : GREEN");
+
         ledGreen();
+
+        Serial.println("GREEN TERMINE");
     }
 
 
     // --------------------------------------------------------
-    // BLEU
+    // ROUGE
     // --------------------------------------------------------
 
-    else if (color == "blue")
+    else if (color == "red")
     {
-        ledBlue();
-    }
+        Serial.println("COMMAND : RED");
 
+        ledRed();
 
-    // --------------------------------------------------------
-    // ORANGE
-    // --------------------------------------------------------
-
-    else if (color == "orange")
-    {
-        ledOrange();
+        Serial.println("RED TERMINE");
     }
 
 
@@ -208,31 +227,54 @@ void handleLED()
 
     else if (color == "off")
     {
+        Serial.println("COMMAND : OFF");
+
         ledsOff();
+
+        Serial.println("OFF TERMINE");
     }
 
 
     // --------------------------------------------------------
-    // COULEUR INVALIDE
+    // COULEUR INCONNUE
     // --------------------------------------------------------
 
     else
     {
+        Serial.print("COULEUR INCONNUE : ");
+        Serial.println(color);
+
         server.send(
             400,
             "application/json",
-            "{\"ok\":false,\"error\":\"invalid color\"}"
+            "{\"ok\":false,\"error\":\"unknown color\"}"
         );
+
+        Serial.println("==============================");
+        Serial.println("FIN HTTP LED");
+        Serial.println("==============================");
 
         return;
     }
 
+
+    // --------------------------------------------------------
+    // RÉPONSE HTTP
+    // --------------------------------------------------------
+
+    Serial.println("ENVOI REPONSE HTTP");
 
     server.send(
         200,
         "application/json",
         "{\"ok\":true}"
     );
+
+    Serial.println("REPONSE HTTP ENVOYEE");
+
+    Serial.println("==============================");
+    Serial.println("FIN HTTP LED");
+    Serial.println("==============================");
 }
 
 
@@ -242,31 +284,65 @@ void handleLED()
 
 void handleBuzzer()
 {
-    if (!server.hasArg("action"))
+    Serial.println();
+    Serial.println("==============================");
+    Serial.println("HTTP BUZZER REQUEST");
+    Serial.println("==============================");
+
+    if (!server.hasArg("color"))
     {
+        Serial.println("ERREUR : argument color absent");
+
         server.send(
             400,
             "application/json",
-            "{\"ok\":false,\"error\":\"missing action\"}"
+            "{\"ok\":false,\"error\":\"missing color\"}"
         );
 
         return;
     }
 
+    String color = server.arg("color");
 
-    String action = server.arg("action");
+    color.toLowerCase();
+
+    Serial.print("API BUZZER : ");
+    Serial.println(color);
 
 
     // --------------------------------------------------------
-    // ON
+    // RED
     // --------------------------------------------------------
 
-    if (action == "on")
+    if (color == "red")
     {
-        digitalWrite(
-            BUZZER_PIN,
-            HIGH
-        );
+        Serial.println("BUZZER COMMAND : RED");
+
+        ledRed();
+    }
+
+
+    // --------------------------------------------------------
+    // GREEN
+    // --------------------------------------------------------
+
+    else if (color == "green")
+    {
+        Serial.println("BUZZER COMMAND : GREEN");
+
+        ledGreen();
+    }
+
+
+    // --------------------------------------------------------
+    // BLUE
+    // --------------------------------------------------------
+
+    else if (color == "blue")
+    {
+        Serial.println("BUZZER COMMAND : BLUE");
+
+        ledBlue();
     }
 
 
@@ -274,85 +350,27 @@ void handleBuzzer()
     // OFF
     // --------------------------------------------------------
 
-    else if (action == "off")
+    else if (color == "off")
     {
-        digitalWrite(
-            BUZZER_PIN,
-            LOW
-        );
+        Serial.println("BUZZER COMMAND : OFF");
+
+        ledsOff();
     }
 
 
     // --------------------------------------------------------
-    // BEEP
-    // --------------------------------------------------------
-
-    else if (action == "beep")
-    {
-        digitalWrite(
-            BUZZER_PIN,
-            HIGH
-        );
-
-        delay(150);
-
-        digitalWrite(
-            BUZZER_PIN,
-            LOW
-        );
-    }
-
-
-    // --------------------------------------------------------
-    // TEST LED ROUGE
-    // --------------------------------------------------------
-
-    else if (action == "red")
-    {
-        ledRed();
-    }
-
-
-    // --------------------------------------------------------
-    // TEST LED VERTE
-    // --------------------------------------------------------
-
-    else if (action == "green")
-    {
-        ledGreen();
-    }
-
-
-    // --------------------------------------------------------
-    // TEST LED BLEUE
-    // --------------------------------------------------------
-
-    else if (action == "blue")
-    {
-        ledBlue();
-    }
-
-
-    // --------------------------------------------------------
-    // TEST LED ORANGE
-    // --------------------------------------------------------
-
-    else if (action == "orange")
-    {
-        ledOrange();
-    }
-
-
-    // --------------------------------------------------------
-    // ACTION INVALIDE
+    // INCONNU
     // --------------------------------------------------------
 
     else
     {
+        Serial.print("COULEUR BUZZER INCONNUE : ");
+        Serial.println(color);
+
         server.send(
             400,
             "application/json",
-            "{\"ok\":false,\"error\":\"invalid action\"}"
+            "{\"ok\":false,\"error\":\"unknown color\"}"
         );
 
         return;
@@ -364,24 +382,12 @@ void handleBuzzer()
         "application/json",
         "{\"ok\":true}"
     );
-}
 
+    Serial.println("REPONSE BUZZER ENVOYEE");
 
-// ============================================================
-// REBOOT
-// ============================================================
-
-void handleReboot()
-{
-    server.send(
-        200,
-        "application/json",
-        "{\"ok\":true,\"message\":\"rebooting\"}"
-    );
-
-    delay(100);
-
-    ESP.restart();
+    Serial.println("==============================");
+    Serial.println("FIN HTTP BUZZER");
+    Serial.println("==============================");
 }
 
 
@@ -391,22 +397,31 @@ void handleReboot()
 
 void handleNotFound()
 {
+    Serial.print("HTTP 404 : ");
+    Serial.println(server.uri());
+
     server.send(
         404,
         "text/plain",
-        "Not found: " + server.uri()
+        "404 Not Found"
     );
 }
 
 
 // ============================================================
-// INITIALISATION
+// INITIALISATION SERVEUR
 // ============================================================
 
 void webserverInit()
 {
+    Serial.println();
+    Serial.println("==============================");
+    Serial.println("INITIALISATION SERVEUR WEB");
+    Serial.println("==============================");
+
+
     // --------------------------------------------------------
-    // PAGE PRINCIPALE
+    // ROUTES PRINCIPALES
     // --------------------------------------------------------
 
     server.on(
@@ -415,21 +430,11 @@ void webserverInit()
         handleRoot
     );
 
-
-    // --------------------------------------------------------
-    // CSS
-    // --------------------------------------------------------
-
     server.on(
         "/style.css",
         HTTP_GET,
         handleCSS
     );
-
-
-    // --------------------------------------------------------
-    // JAVASCRIPT
-    // --------------------------------------------------------
 
     server.on(
         "/script.js",
@@ -439,7 +444,7 @@ void webserverInit()
 
 
     // --------------------------------------------------------
-    // API STATUS
+    // API
     // --------------------------------------------------------
 
     server.on(
@@ -448,21 +453,11 @@ void webserverInit()
         handleStatus
     );
 
-
-    // --------------------------------------------------------
-    // API TEMPERATURES
-    // --------------------------------------------------------
-
     server.on(
         "/api/temperatures",
         HTTP_GET,
         handleTemperatures
     );
-
-
-    // --------------------------------------------------------
-    // API LED
-    // --------------------------------------------------------
 
     server.on(
         "/api/led",
@@ -470,26 +465,10 @@ void webserverInit()
         handleLED
     );
 
-
-    // --------------------------------------------------------
-    // API BUZZER
-    // --------------------------------------------------------
-
     server.on(
         "/api/buzzer",
         HTTP_GET,
         handleBuzzer
-    );
-
-
-    // --------------------------------------------------------
-    // API REBOOT
-    // --------------------------------------------------------
-
-    server.on(
-        "/api/reboot",
-        HTTP_GET,
-        handleReboot
     );
 
 
@@ -503,19 +482,21 @@ void webserverInit()
 
 
     // --------------------------------------------------------
-    // START
+    // DÉMARRAGE
     // --------------------------------------------------------
 
     server.begin();
 
-    Serial.println(
-        "Webserver OK"
-    );
+    Serial.println("SERVEUR WEB : OK");
+
+    Serial.println("==============================");
+    Serial.println("SYSTEME PRET");
+    Serial.println("==============================");
 }
 
 
 // ============================================================
-// BOUCLE
+// BOUCLE SERVEUR
 // ============================================================
 
 void webserverLoop()
