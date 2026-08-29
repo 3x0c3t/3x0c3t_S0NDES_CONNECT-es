@@ -19,6 +19,7 @@ void oledInit()
     Wire.begin(OLED_SDA, OLED_SCL);
 
     oled.begin();
+    oled.clearBuffer();
 }
 
 
@@ -89,7 +90,7 @@ void wifiScreen(bool ok, String ssid, String ip)
         oled.drawStr(
             0,
             25,
-            "WIFI ERROR"
+            "!! NO WIFI !!"
         );
     }
 
@@ -106,7 +107,7 @@ void temperatureScreen()
     oled.drawStr(
         0,
         8,
-        "FRIGO_20260803"
+        HOSTNAME
     );
 
     int y = 22;

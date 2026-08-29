@@ -102,6 +102,10 @@ void ledsTest()
     Serial.println("TEST LEDS");
     Serial.println("==============================");
 
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_GREEN, LOW);
+
 
     // --------------------------------------------------------
     // BLEU
@@ -109,23 +113,10 @@ void ledsTest()
 
     Serial.println("LED BLEUE");
 
-    digitalWrite(LED_GREEN, LOW);
-    digitalWrite(LED_RED, LOW);
-
-    digitalWrite(LED_BLUE, LOW);
-
-    Serial.println("GPIO14 LOW");
-
-    delay(1000);
-
     digitalWrite(LED_BLUE, HIGH);
+    delay(500);
 
-    Serial.println("GPIO14 HIGH");
-
-    delay(2000);
-
-    digitalWrite(LED_BLUE, LOW);
-
+    digitalWrite(LED_GREEN, LOW);
     delay(500);
 
 
