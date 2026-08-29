@@ -1,7 +1,10 @@
 #ifndef WIFI_H
 #define WIFI_H
 
-// === INITIALISATION WIFI
+// === WIFI INIT
 void wifiInit();
+
+// === WIFI LOOP
+void wifiLoop();
 
 #endif

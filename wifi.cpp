@@ -9,6 +9,49 @@
 #include "leds.h"
 
 
+// === WIFI ETAT
+static bool wifiConnected = false;
+
+
+// === WIFI RECONNEXION
+static unsigned long lastReconnectAttempt = 0;
+
+static const unsigned long WIFI_RECONNECT_INTERVAL = 10000;
+
+
+// === WIFI STATUS
+const char* wifiStatusText(
+    wl_status_t status
+)
+{
+    switch (
+        status
+    )
+    {
+        case WL_CONNECTED:
+            return "WL_CONNECTED";
+
+        case WL_NO_SSID_AVAIL:
+            return "WL_NO_SSID_AVAIL";
+
+        case WL_CONNECT_FAILED:
+            return "WL_CONNECT_FAILED";
+
+        case WL_CONNECTION_LOST:
+            return "WL_CONNECTION_LOST";
+
+        case WL_DISCONNECTED:
+            return "WL_DISCONNECTED";
+
+        case WL_IDLE_STATUS:
+            return "WL_IDLE_STATUS";
+
+        default:
+            return "UNKNOWN";
+    }
+}
+
+
 // === WIFI INIT
 void wifiInit()
 {
@@ -64,6 +107,18 @@ void wifiInit()
     Serial.println();
 
 
+    // === WIFI STATUS
+    Serial.print(
+        "WiFi STATUS : "
+    );
+
+    Serial.println(
+        wifiStatusText(
+            WiFi.status()
+        )
+    );
+
+
     // ========================================================
     // WIFI OK
     // ========================================================
@@ -72,6 +127,10 @@ void wifiInit()
         WiFi.status() == WL_CONNECTED
     )
     {
+        wifiConnected =
+            true;
+
+
         Serial.println(
             "WiFi OK"
         );
@@ -122,7 +181,7 @@ void wifiInit()
         );
 
 
-        // === CONNEXION REUSSIE
+        // === WIFI SUCCESS
         wifiSuccessBeep();
 
 
@@ -137,6 +196,10 @@ void wifiInit()
 
     else
     {
+        wifiConnected =
+            false;
+
+
         Serial.println(
             "WiFi FAIL"
         );
@@ -156,7 +219,7 @@ void wifiInit()
         );
 
 
-        // === CONNEXION ECHOUEE
+        // === WIFI FAILURE
         wifiFailureBeep();
 
 
@@ -164,9 +227,194 @@ void wifiInit()
         ledsRedBlink3();
 
 
-        // === WIFI RECONNEXION
+        // === RECONNEXION
         Serial.println(
             "WiFi : reconnexion automatique active"
+        );
+
+
+        lastReconnectAttempt =
+            millis();
+    }
+}
+
+
+// === WIFI LOOP
+void wifiLoop()
+{
+    wl_status_t status =
+        WiFi.status();
+
+
+    // ========================================================
+    // WIFI CONNECTE
+    // ========================================================
+
+    if (
+        status == WL_CONNECTED
+    )
+    {
+        // === DETECTION RETOUR WIFI
+        if (
+            !wifiConnected
+        )
+        {
+            wifiConnected =
+                true;
+
+
+            Serial.println();
+
+            Serial.println(
+                "=============================="
+            );
+
+            Serial.println(
+                "WiFi RECONNECTE"
+            );
+
+            Serial.println(
+                "=============================="
+            );
+
+
+            String ssid =
+                WiFi.SSID();
+
+            String ip =
+                WiFi.localIP().toString();
+
+
+            Serial.print(
+                "SSID : "
+            );
+
+            Serial.println(
+                ssid
+            );
+
+
+            Serial.print(
+                "IP   : "
+            );
+
+            Serial.println(
+                ip
+            );
+
+
+            // === BOOT WIFI
+            bootWifiStatus(
+                true
+            );
+
+
+            // === BOOT IP
+            bootIpAddress(
+                ip.c_str()
+            );
+
+
+            // === WIFI SCREEN
+            wifiScreen(
+                true,
+                ssid,
+                ip
+            );
+
+
+            // === WIFI SUCCESS
+            wifiSuccessBeep();
+
+
+            // === LED VERTE
+            ledsGreenBlink3();
+        }
+
+
+        return;
+    }
+
+
+    // ========================================================
+    // WIFI DECONNECTE
+    // ========================================================
+
+    if (
+        wifiConnected
+    )
+    {
+        wifiConnected =
+            false;
+
+
+        Serial.println();
+
+        Serial.println(
+            "=============================="
+        );
+
+        Serial.println(
+            "WiFi DECONNECTE"
+        );
+
+        Serial.println(
+            "=============================="
+        );
+
+
+        Serial.print(
+            "WiFi STATUS : "
+        );
+
+        Serial.println(
+            wifiStatusText(
+                status
+            )
+        );
+    }
+
+
+    // ========================================================
+    // RECONNEXION
+    // ========================================================
+
+    if (
+        millis() -
+        lastReconnectAttempt >=
+        WIFI_RECONNECT_INTERVAL
+    )
+    {
+        lastReconnectAttempt =
+            millis();
+
+
+        Serial.println();
+
+        Serial.println(
+            "WiFi RECONNECT"
+        );
+
+
+        Serial.print(
+            "WiFi STATUS : "
+        );
+
+        Serial.println(
+            wifiStatusText(
+                status
+            )
+        );
+
+
+        WiFi.disconnect();
+
+        delay(50);
+
+
+        WiFi.begin(
+            WIFI_SSID,
+            WIFI_PASSWORD
         );
     }
 }
