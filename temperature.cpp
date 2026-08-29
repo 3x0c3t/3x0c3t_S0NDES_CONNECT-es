@@ -4,78 +4,210 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+#include "config.h"
 #include "settings.h"
 
 
-// ============================================================
-// DS18B20
-// ============================================================
+// === DS18B20
+OneWire oneWire(
+    ONE_WIRE_BUS
+);
 
-OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(
+    &oneWire
+);
 
-DallasTemperature sensors(&oneWire);
 
-
-// ============================================================
-// DONNÉES
-// ============================================================
-
+// === TEMPERATURES
 float temperatures[MAX_SENSORS];
 
 uint8_t sensorCount = 0;
 
 
-// ============================================================
-// ÉTAT LECTURE NON BLOQUANTE
-// ============================================================
+// === ADRESSES DS18B20
+DeviceAddress sensorAddresses[MAX_SENSORS];
+
+
+// === CONVERSION
+static bool conversionRunning = false;
 
 static unsigned long conversionStart = 0;
 
-static bool conversionRunning = false;
+
+// === INTERVALLE MESURE
+static unsigned long lastMeasurement = 0;
+
+static const unsigned long MEASUREMENT_INTERVAL = 5000;
 
 
-// Temps maximum pour une conversion DS18B20 en résolution 12 bits
+// === TEMPS CONVERSION
 static const unsigned long CONVERSION_TIME_MS = 750;
 
 
-// ============================================================
-// INITIALISATION
-// ============================================================
+// === AFFICHER ADRESSE
+void printSensorAddress(
+    DeviceAddress address
+)
+{
+    for (
+        uint8_t i = 0;
+        i < 8;
+        i++
+    )
+    {
+        if (
+            address[i] < 16
+        )
+        {
+            Serial.print(
+                "0"
+            );
+        }
 
+        Serial.print(
+            address[i],
+            HEX
+        );
+
+        if (
+            i < 7
+        )
+        {
+            Serial.print(
+                " "
+            );
+        }
+    }
+}
+
+
+// === INITIALISATION
 void temperatureInit()
 {
     sensors.begin();
 
-    sensorCount = sensors.getDeviceCount();
 
-    if (sensorCount > MAX_SENSORS)
+    // === NOMBRE SONDES
+    sensorCount =
+        sensors.getDeviceCount();
+
+
+    // === LIMITE SONDES
+    if (
+        sensorCount >
+        MAX_SENSORS
+    )
     {
-        sensorCount = MAX_SENSORS;
+        sensorCount =
+            MAX_SENSORS;
     }
 
 
-    // --------------------------------------------------------
-    // Lecture non bloquante
-    // --------------------------------------------------------
-
-    sensors.setWaitForConversion(false);
-
-
     Serial.println();
-    Serial.println("DS18B20");
 
-    Serial.print("Sondes : ");
-    Serial.println(sensorCount);
+    Serial.println(
+        "DS18B20"
+    );
+
+    Serial.print(
+        "Sondes : "
+    );
+
+    Serial.println(
+        sensorCount
+    );
+
+
+    // === RECUPERATION ADRESSES
+    for (
+        uint8_t i = 0;
+        i < sensorCount;
+        i++
+    )
+    {
+        if (
+            sensors.getAddress(
+                sensorAddresses[i],
+                i
+            )
+        )
+        {
+            Serial.print(
+                "S"
+            );
+
+            Serial.print(
+                i + 1
+            );
+
+            Serial.print(
+                " adresse : "
+            );
+
+            printSensorAddress(
+                sensorAddresses[i]
+            );
+
+            Serial.println();
+        }
+        else
+        {
+            Serial.print(
+                "ERREUR adresse S"
+            );
+
+            Serial.println(
+                i + 1
+            );
+        }
+    }
+
+
+    // === RESOLUTION
+    for (
+        uint8_t i = 0;
+        i < sensorCount;
+        i++
+    )
+    {
+        sensors.setResolution(
+            sensorAddresses[i],
+            12
+        );
+    }
+
+
+    // === CONVERSION NON BLOQUANTE
+    sensors.setWaitForConversion(
+        false
+    );
+
+
+    // === INITIALISATION TEMPERATURES
+    for (
+        uint8_t i = 0;
+        i < MAX_SENSORS;
+        i++
+    )
+    {
+        temperatures[i] =
+            DEVICE_DISCONNECTED_C;
+    }
+
+
+    // === PREMIERE MESURE IMMEDIATE
+    lastMeasurement =
+        millis() -
+        MEASUREMENT_INTERVAL;
 }
 
 
-// ============================================================
-// LANCER UNE CONVERSION
-// ============================================================
-
+// === LANCER CONVERSION
 void startTemperatureConversion()
 {
-    if (conversionRunning)
+    if (
+        conversionRunning
+    )
     {
         return;
     }
@@ -83,68 +215,139 @@ void startTemperatureConversion()
 
     sensors.requestTemperatures();
 
-    conversionStart = millis();
+    conversionStart =
+        millis();
 
-    conversionRunning = true;
+    conversionRunning =
+        true;
+
+
+    Serial.println(
+        "CONVERSION START"
+    );
 }
 
 
-// ============================================================
-// TERMINER UNE CONVERSION
-// ============================================================
-
+// === TERMINER CONVERSION
 void finishTemperatureConversion()
 {
-    if (!conversionRunning)
+    if (
+        !conversionRunning
+    )
     {
         return;
     }
 
 
-    if (millis() - conversionStart < CONVERSION_TIME_MS)
+    // === ATTENTE CONVERSION
+    if (
+        millis() -
+        conversionStart <
+        CONVERSION_TIME_MS
+    )
     {
         return;
     }
 
 
-    // --------------------------------------------------------
-    // Lecture des résultats
-    // --------------------------------------------------------
-
-    for (uint8_t i = 0; i < sensorCount; i++)
+    // === LECTURE SONDES
+    for (
+        uint8_t i = 0;
+        i < sensorCount;
+        i++
+    )
     {
-        temperatures[i] =
-            sensors.getTempCByIndex(i);
+        float temperature =
+            sensors.getTempC(
+                sensorAddresses[i]
+            );
 
 
-        Serial.print("S");
-        Serial.print(i + 1);
+        // === TEMPERATURE VALIDE
+        if (
+            temperature !=
+            DEVICE_DISCONNECTED_C
+        )
+        {
+            temperatures[i] =
+                temperature;
+        }
 
-        Serial.print(" : ");
 
-        Serial.println(
-            temperatures[i]
+        Serial.print(
+            "S"
         );
+
+        Serial.print(
+            i + 1
+        );
+
+        Serial.print(
+            " : "
+        );
+
+
+        // === ERREUR LECTURE
+        if (
+            temperature ==
+            DEVICE_DISCONNECTED_C
+        )
+        {
+            Serial.println(
+                "ERREUR DECONNEXION"
+            );
+        }
+
+
+        // === TEMPERATURE
+        else
+        {
+            Serial.println(
+                temperature,
+                2
+            );
+        }
     }
 
 
-    conversionRunning = false;
+    conversionRunning =
+        false;
+
+    lastMeasurement =
+        millis();
+
+
+    Serial.println(
+        "CONVERSION END"
+    );
 }
 
 
-// ============================================================
-// LECTURE NON BLOQUANTE
-// ============================================================
-
+// === LECTURE TEMPERATURES
 void readTemperatures()
 {
-    if (!conversionRunning)
+    // === CONVERSION EN COURS
+    if (
+        conversionRunning
+    )
     {
-        startTemperatureConversion();
+        finishTemperatureConversion();
 
         return;
     }
 
 
-    finishTemperatureConversion();
+    // === ATTENTE INTERVALLE
+    if (
+        millis() -
+        lastMeasurement <
+        MEASUREMENT_INTERVAL
+    )
+    {
+        return;
+    }
+
+
+    // === NOUVELLE CONVERSION
+    startTemperatureConversion();
 }
