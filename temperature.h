@@ -4,17 +4,27 @@
 #include "config.h"
 
 
-// === INITIALISATION
+// ============================================================
+// INITIALISATION
+// ============================================================
+
 void temperatureInit();
 
 
-// === LECTURE TEMPERATURES
+// ============================================================
+// LECTURE TEMPERATURES
+// ============================================================
+
 void readTemperatures();
 
 
-// === CONVERSION
+// ============================================================
+// CONVERSION
+// ============================================================
+
 void startTemperatureConversion();
 
 void finishTemperatureConversion();
+
 
 #endif

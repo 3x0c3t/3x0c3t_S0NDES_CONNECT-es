@@ -1,168 +1,259 @@
 #include "leds.h"
+
 #include <Arduino.h>
+
 #include "settings.h"
+#include "debug.h"
 
 
-// === INITIALISATION
+// ============================================================
+// INITIALISATION
+// ============================================================
+
 void ledsInit()
 {
-    Serial.println("=== INITIALISATION LEDS ===");
+    debugLedsInitStart();
 
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
-    pinMode(LED_RED, OUTPUT);
+    pinMode(
+        LED_BLUE,
+        OUTPUT
+    );
+
+    pinMode(
+        LED_GREEN,
+        OUTPUT
+    );
+
+    pinMode(
+        LED_RED,
+        OUTPUT
+    );
 
     ledsOff();
 
-    Serial.print("LED BLEUE : GPIO");
-    Serial.println(LED_BLUE);
+    debugLedBluePin(
+        LED_BLUE,
+        digitalRead(LED_BLUE)
+    );
 
-    Serial.print("LED VERTE : GPIO");
-    Serial.println(LED_GREEN);
+    debugLedGreenPin(
+        LED_GREEN,
+        digitalRead(LED_GREEN)
+    );
 
-    Serial.print("LED ROUGE : GPIO");
-    Serial.println(LED_RED);
+    debugLedRedPin(
+        LED_RED,
+        digitalRead(LED_RED)
+    );
 
-    Serial.println("=== LEDS INITIALISEES ===");
+    debugLedsInitEnd();
 }
 
 
-// === LEDS OFF
+// ============================================================
+// LEDS OFF
+// ============================================================
+
 void ledsOff()
 {
-    digitalWrite(LED_BLUE, LOW);
-    digitalWrite(LED_GREEN, LOW);
-    digitalWrite(LED_RED, LOW);
+    digitalWrite(
+        LED_BLUE,
+        LOW
+    );
 
-    Serial.println("LEDS OFF");
+    digitalWrite(
+        LED_GREEN,
+        LOW
+    );
+
+    digitalWrite(
+        LED_RED,
+        LOW
+    );
+
+    debugLedsOff();
 }
 
 
-// === LED BLEUE
+// ============================================================
+// LED BLEUE
+// ============================================================
+
 void ledBlue()
 {
-    Serial.println("=== LED BLEUE ===");
+    debugLedBlue();
 
-    digitalWrite(LED_GREEN, LOW);
-    digitalWrite(LED_RED, LOW);
-    digitalWrite(LED_BLUE, HIGH);
+    digitalWrite(
+        LED_GREEN,
+        LOW
+    );
 
-    Serial.print("GPIO");
-    Serial.print(LED_BLUE);
-    Serial.print(" = ");
-    Serial.println(digitalRead(LED_BLUE));
+    digitalWrite(
+        LED_RED,
+        LOW
+    );
+
+    digitalWrite(
+        LED_BLUE,
+        HIGH
+    );
+
+    debugLedBluePin(
+        LED_BLUE,
+        digitalRead(LED_BLUE)
+    );
 }
 
 
-// === LED VERTE
+// ============================================================
+// LED VERTE
+// ============================================================
+
 void ledGreen()
 {
-    Serial.println("=== LED VERTE ===");
+    debugLedGreen();
 
-    digitalWrite(LED_BLUE, LOW);
-    digitalWrite(LED_RED, LOW);
-    digitalWrite(LED_GREEN, HIGH);
+    digitalWrite(
+        LED_BLUE,
+        LOW
+    );
 
-    Serial.print("GPIO");
-    Serial.print(LED_GREEN);
-    Serial.print(" = ");
-    Serial.println(digitalRead(LED_GREEN));
+    digitalWrite(
+        LED_RED,
+        LOW
+    );
+
+    digitalWrite(
+        LED_GREEN,
+        HIGH
+    );
+
+    debugLedGreenPin(
+        LED_GREEN,
+        digitalRead(LED_GREEN)
+    );
 }
 
 
-// === LED ROUGE
+// ============================================================
+// LED ROUGE
+// ============================================================
+
 void ledRed()
 {
-    Serial.println("=== LED ROUGE ===");
+    debugLedRed();
 
-    digitalWrite(LED_BLUE, LOW);
-    digitalWrite(LED_GREEN, LOW);
-    digitalWrite(LED_RED, HIGH);
+    digitalWrite(
+        LED_BLUE,
+        LOW
+    );
 
-    Serial.print("GPIO");
-    Serial.print(LED_RED);
-    Serial.print(" = ");
-    Serial.println(digitalRead(LED_RED));
+    digitalWrite(
+        LED_GREEN,
+        LOW
+    );
+
+    digitalWrite(
+        LED_RED,
+        HIGH
+    );
+
+    debugLedRedPin(
+        LED_RED,
+        digitalRead(LED_RED)
+    );
 }
 
 
-// === TEST LEDS
+// ============================================================
+// TEST LEDS
+// ============================================================
+
 void ledsTest()
 {
-    Serial.println("=== TEST LEDS ===");
+    debugLedsTestStart();
 
-    // === LED BLEUE
     ledBlue();
     delay(1000);
 
-    // === LED VERTE
     ledGreen();
     delay(1000);
 
-    // === LED ROUGE
     ledRed();
     delay(1000);
 
-    // === LEDS OFF
     ledsOff();
 
-    Serial.println("=== FIN TEST LEDS ===");
+    debugLedsTestEnd();
 }
 
 
-// === ARC-EN-CIEL
+// ============================================================
+// ARC-EN-CIEL
+// ============================================================
+
 void ledsRainbow()
 {
-    Serial.println("=== ARC-EN-CIEL ===");
+    debugLedsRainbow();
 
-    // === LED ROUGE
     ledRed();
     delay(500);
 
-    // === LED VERTE
     ledGreen();
     delay(500);
 
-    // === LED BLEUE
     ledBlue();
     delay(500);
 
-    // === LEDS OFF
     ledsOff();
 }
 
 
-// === VERT : 3 CLIGNOTEMENTS
+// ============================================================
+// VERT : 3 CLIGNOTEMENTS
+// ============================================================
+
 void ledsGreenBlink3()
 {
-    Serial.println("=== LED VERTE : 3 CLIGNOTEMENTS ===");
+    debugLedGreenBlinkStart();
 
-    for (int i = 0; i < 3; i++)
+    for (
+        int i = 0;
+        i < 3;
+        i++
+    )
     {
-        // === LED VERTE ON
         ledGreen();
+
         delay(250);
 
-        // === LED OFF
         ledsOff();
+
         delay(250);
     }
 }
 
 
-// === ROUGE : 3 CLIGNOTEMENTS
+// ============================================================
+// ROUGE : 3 CLIGNOTEMENTS
+// ============================================================
+
 void ledsRedBlink3()
 {
-    Serial.println("=== LED ROUGE : 3 CLIGNOTEMENTS ===");
+    debugLedRedBlinkStart();
 
-    for (int i = 0; i < 3; i++)
+    for (
+        int i = 0;
+        i < 3;
+        i++
+    )
     {
-        // === LED ROUGE ON
         ledRed();
+
         delay(250);
 
-        // === LED OFF
         ledsOff();
+
         delay(250);
     }
 }

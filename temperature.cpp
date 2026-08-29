@@ -8,7 +8,10 @@
 #include "settings.h"
 
 
-// === DS18B20
+// ============================================================
+// DS18B20
+// ============================================================
+
 OneWire oneWire(
     ONE_WIRE_BUS
 );
@@ -18,33 +21,51 @@ DallasTemperature sensors(
 );
 
 
-// === TEMPERATURES
+// ============================================================
+// TEMPERATURES
+// ============================================================
+
 float temperatures[MAX_SENSORS];
 
 uint8_t sensorCount = 0;
 
 
-// === ADRESSES DS18B20
+// ============================================================
+// ADRESSES DS18B20
+// ============================================================
+
 DeviceAddress sensorAddresses[MAX_SENSORS];
 
 
-// === CONVERSION
+// ============================================================
+// CONVERSION
+// ============================================================
+
 static bool conversionRunning = false;
 
 static unsigned long conversionStart = 0;
 
 
-// === INTERVALLE MESURE
+// ============================================================
+// INTERVALLE MESURE
+// ============================================================
+
 static unsigned long lastMeasurement = 0;
 
 static const unsigned long MEASUREMENT_INTERVAL = 5000;
 
 
-// === TEMPS CONVERSION
+// ============================================================
+// TEMPS CONVERSION
+// ============================================================
+
 static const unsigned long CONVERSION_TIME_MS = 750;
 
 
-// === AFFICHER ADRESSE
+// ============================================================
+// AFFICHER ADRESSE
+// ============================================================
+
 void printSensorAddress(
     DeviceAddress address
 )
@@ -81,18 +102,27 @@ void printSensorAddress(
 }
 
 
-// === INITIALISATION
+// ============================================================
+// INITIALISATION
+// ============================================================
+
 void temperatureInit()
 {
     sensors.begin();
 
 
-    // === NOMBRE SONDES
+    // ========================================================
+    // NOMBRE SONDES
+    // ========================================================
+
     sensorCount =
         sensors.getDeviceCount();
 
 
-    // === LIMITE SONDES
+    // ========================================================
+    // LIMITE SONDES
+    // ========================================================
+
     if (
         sensorCount >
         MAX_SENSORS
@@ -118,7 +148,10 @@ void temperatureInit()
     );
 
 
-    // === RECUPERATION ADRESSES
+    // ========================================================
+    // RECUPERATION ADRESSES
+    // ========================================================
+
     for (
         uint8_t i = 0;
         i < sensorCount;
@@ -163,7 +196,10 @@ void temperatureInit()
     }
 
 
-    // === RESOLUTION
+    // ========================================================
+    // RESOLUTION
+    // ========================================================
+
     for (
         uint8_t i = 0;
         i < sensorCount;
@@ -177,13 +213,19 @@ void temperatureInit()
     }
 
 
-    // === CONVERSION NON BLOQUANTE
+    // ========================================================
+    // CONVERSION NON BLOQUANTE
+    // ========================================================
+
     sensors.setWaitForConversion(
         false
     );
 
 
-    // === INITIALISATION TEMPERATURES
+    // ========================================================
+    // INITIALISATION TEMPERATURES
+    // ========================================================
+
     for (
         uint8_t i = 0;
         i < MAX_SENSORS;
@@ -195,14 +237,20 @@ void temperatureInit()
     }
 
 
-    // === PREMIERE MESURE IMMEDIATE
+    // ========================================================
+    // PREMIERE MESURE IMMEDIATE
+    // ========================================================
+
     lastMeasurement =
         millis() -
         MEASUREMENT_INTERVAL;
 }
 
 
-// === LANCER CONVERSION
+// ============================================================
+// LANCER CONVERSION
+// ============================================================
+
 void startTemperatureConversion()
 {
     if (
@@ -228,7 +276,10 @@ void startTemperatureConversion()
 }
 
 
-// === TERMINER CONVERSION
+// ============================================================
+// TERMINER CONVERSION
+// ============================================================
+
 void finishTemperatureConversion()
 {
     if (
@@ -239,7 +290,10 @@ void finishTemperatureConversion()
     }
 
 
-    // === ATTENTE CONVERSION
+    // ========================================================
+    // ATTENTE CONVERSION
+    // ========================================================
+
     if (
         millis() -
         conversionStart <
@@ -250,7 +304,10 @@ void finishTemperatureConversion()
     }
 
 
-    // === LECTURE SONDES
+    // ========================================================
+    // LECTURE SONDES
+    // ========================================================
+
     for (
         uint8_t i = 0;
         i < sensorCount;
@@ -263,7 +320,10 @@ void finishTemperatureConversion()
             );
 
 
-        // === TEMPERATURE VALIDE
+        // ====================================================
+        // TEMPERATURE VALIDE
+        // ====================================================
+
         if (
             temperature !=
             DEVICE_DISCONNECTED_C
@@ -287,7 +347,10 @@ void finishTemperatureConversion()
         );
 
 
-        // === ERREUR LECTURE
+        // ====================================================
+        // ERREUR LECTURE
+        // ====================================================
+
         if (
             temperature ==
             DEVICE_DISCONNECTED_C
@@ -299,7 +362,10 @@ void finishTemperatureConversion()
         }
 
 
-        // === TEMPERATURE
+        // ====================================================
+        // TEMPERATURE
+        // ====================================================
+
         else
         {
             Serial.println(
@@ -323,10 +389,16 @@ void finishTemperatureConversion()
 }
 
 
-// === LECTURE TEMPERATURES
+// ============================================================
+// LECTURE TEMPERATURES
+// ============================================================
+
 void readTemperatures()
 {
-    // === CONVERSION EN COURS
+    // ========================================================
+    // CONVERSION EN COURS
+    // ========================================================
+
     if (
         conversionRunning
     )
@@ -337,7 +409,10 @@ void readTemperatures()
     }
 
 
-    // === ATTENTE INTERVALLE
+    // ========================================================
+    // ATTENTE INTERVALLE
+    // ========================================================
+
     if (
         millis() -
         lastMeasurement <
@@ -348,6 +423,9 @@ void readTemperatures()
     }
 
 
-    // === NOUVELLE CONVERSION
+    // ========================================================
+    // NOUVELLE CONVERSION
+    // ========================================================
+
     startTemperatureConversion();
 }
