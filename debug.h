@@ -52,12 +52,19 @@ void debugLedsTestEnd();
 void debugLedGreenBlinkStart();
 void debugLedRedBlinkStart();
 
+void debugLedsRainbow();
+
 
 // ============================================================
 // WIFI
 // ============================================================
 
 void debugWifiStart();
+
+void debugWifiStatus(
+    const String& status
+);
+
 void debugWifiOk();
 void debugWifiFail();
 
@@ -67,6 +74,17 @@ void debugWifiSsid(
 
 void debugWifiIp(
     const String& ip
+);
+
+void debugWifiReconnectEnabled();
+void debugWifiReconnected();
+
+void debugWifiDisconnected(
+    const String& status
+);
+
+void debugWifiReconnect(
+    const String& status
 );
 
 
@@ -80,12 +98,25 @@ void debugTemperatureSensorCount(
     uint8_t count
 );
 
+void debugTemperatureSensorAddress(
+    uint8_t sensor,
+    const uint8_t* address
+);
+
+void debugTemperatureSensorAddressError(
+    uint8_t sensor
+);
+
 void debugTemperatureConversionStart();
 void debugTemperatureConversionEnd();
 
 void debugTemperature(
     uint8_t sensor,
     float temperature
+);
+
+void debugTemperatureError(
+    uint8_t sensor
 );
 
 
@@ -109,19 +140,29 @@ void debugHttpLedCommand(
     const String& color
 );
 
+void debugHttpLedBlue();
+void debugHttpLedGreen();
+void debugHttpLedRed();
+void debugHttpLedOff();
+
 void debugHttpLedEnd();
 
 void debugHttpBuzzerStart();
 
 void debugHttpBuzzerCommand(
-    const String& action
+    const String& color
 );
 
+void debugHttpBuzzerRed();
+void debugHttpBuzzerGreen();
+void debugHttpBuzzerBlue();
+void debugHttpBuzzerOff();
+
+void debugHttpBuzzerResponse();
 void debugHttpBuzzerEnd();
 
-void debugHttpRebootStart();
-void debugHttpRebootResponse();
-void debugHttpRebootRestart();
+void debugHttpResponseStart();
+void debugHttpResponseEnd();
 
 void debugHttp404(
     const String& uri
@@ -137,5 +178,35 @@ void debugErrorMissingColor();
 void debugErrorUnknownColor(
     const String& color
 );
+
+void debugErrorUnknownBuzzerColor(
+    const String& color
+);
+
+
+// ============================================================
+// OTA
+// ============================================================
+
+void debugOtaStart();
+void debugOtaEnd();
+
+void debugOtaProgress(
+    unsigned int progress,
+    unsigned int total
+);
+
+void debugOtaError(
+    uint8_t error
+);
+
+void debugOtaReady();
+
+
+// ============================================================
+// SYSTEME
+// ============================================================
+
+void debugWebserverNotStarted();
 
 #endif
