@@ -4,7 +4,12 @@
 
 void buzzerInit();
 
-void beep(int freq, int duration);
+void beep(
+    int freq,
+    int duration
+);
+
+void simpleBeep();
 
 void startupMelody();
 

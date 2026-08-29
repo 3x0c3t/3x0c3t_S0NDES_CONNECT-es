@@ -1,53 +1,153 @@
 #include "buzzer.h"
 #include "settings.h"
 #include "bootscreen.h"
+
 #include <Arduino.h>
 
 
+// ============================================================
+// INITIALISATION
+// ============================================================
+
 void buzzerInit()
 {
-    pinMode(BUZZER_PIN, OUTPUT);
-    noTone(BUZZER_PIN);
+    pinMode(
+        BUZZER_PIN,
+        OUTPUT
+    );
+
+    noTone(
+        BUZZER_PIN
+    );
 }
 
 
-void beep(int freq, int duration)
+// ============================================================
+// BIP GENERIQUE
+// ============================================================
+
+void beep(
+    int freq,
+    int duration
+)
 {
-    tone(BUZZER_PIN, freq, duration);
-    delay(duration);
-    noTone(BUZZER_PIN);
+    tone(
+        BUZZER_PIN,
+        freq,
+        duration
+    );
+
+    delay(
+        duration
+    );
+
+    noTone(
+        BUZZER_PIN
+    );
+
     delay(50);
 }
 
 
-void startupMelody()
-{
-    beep(523, 150);   // Do
-    beep(659, 150);   // Mi
-    beep(784, 250);   // Sol
+// ============================================================
+// BIP SIMPLE
+// ============================================================
 
-    bootBuzzerStatus(true);
+void simpleBeep()
+{
+    beep(
+        1000,
+        150
+    );
 }
 
+
+// ============================================================
+// MELODIE DE DEMARRAGE
+// ============================================================
+
+void startupMelody()
+{
+    beep(
+        523,
+        150
+    );
+
+    beep(
+        659,
+        150
+    );
+
+    beep(
+        784,
+        250
+    );
+
+    bootBuzzerStatus(
+        true
+    );
+}
+
+
+// ============================================================
+// BIP SUCCESS
+// ============================================================
 
 void successBeep()
 {
-    beep(1200, 100);
-    beep(1600, 150);
+    beep(
+        1200,
+        100
+    );
+
+    beep(
+        1600,
+        150
+    );
 }
 
+
+// ============================================================
+// BIP WIFI OK
+// ============================================================
 
 void wifiSuccessBeep()
 {
-    beep(1400, 100);
-    beep(1600, 100);
-    beep(1800, 150);
+    beep(
+        1400,
+        100
+    );
+
+    beep(
+        1600,
+        100
+    );
+
+    beep(
+        1800,
+        150
+    );
 }
 
 
+// ============================================================
+// BIP WIFI / ERREUR
+// ============================================================
+
 void wifiFailureBeep()
 {
-    beep(700, 120);
-    beep(600, 120);
-    beep(500, 180);
+    beep(
+        700,
+        120
+    );
+
+    beep(
+        600,
+        120
+    );
+
+    beep(
+        500,
+        180
+    );
 }

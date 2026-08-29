@@ -22,92 +22,6 @@ ESP8266WebServer server(80);
 
 
 // ============================================================
-// TRANSMISSION DES FICHIERS PROGMEM
-// ============================================================
-
-#define WEB_SEND_BUFFER_SIZE 1024
-
-
-void sendProgmemFile(
-    const char* contentType,
-    PGM_P content
-)
-{
-    if (content == nullptr)
-    {
-        server.send(
-            500,
-            "text/plain",
-            "Internal Server Error"
-        );
-
-        return;
-    }
-
-
-    const size_t contentLength = strlen_P(content);
-
-
-    // --------------------------------------------------------
-    // Annonce de la taille exacte du contenu
-    // --------------------------------------------------------
-
-    server.setContentLength(
-        contentLength
-    );
-
-
-    // --------------------------------------------------------
-    // Envoi des headers HTTP
-    // Corps vide pour le moment
-    // --------------------------------------------------------
-
-    server.send(
-        200,
-        contentType,
-        ""
-    );
-
-
-    // --------------------------------------------------------
-    // Envoi du contenu PROGMEM par blocs
-    // --------------------------------------------------------
-
-    size_t offset = 0;
-
-
-    while (offset < contentLength)
-    {
-        size_t chunkSize =
-            contentLength - offset;
-
-
-        if (chunkSize > WEB_SEND_BUFFER_SIZE)
-        {
-            chunkSize =
-                WEB_SEND_BUFFER_SIZE;
-        }
-
-
-        server.sendContent_P(
-            content + offset,
-            chunkSize
-        );
-
-
-        offset += chunkSize;
-
-
-        // ----------------------------------------------------
-        // Laisser l'ESP8266 traiter le réseau
-        // ----------------------------------------------------
-
-        yield();
-    }
-}
-
-
-// ============================================================
 // PAGE HTML
 // ============================================================
 
@@ -115,8 +29,8 @@ void handleRoot()
 {
     debugHttpRoot();
 
-
-    sendProgmemFile(
+    server.send_P(
+        200,
         "text/html",
         HTML_PAGE
     );
@@ -131,8 +45,8 @@ void handleCSS()
 {
     debugHttpCSS();
 
-
-    sendProgmemFile(
+    server.send_P(
+        200,
         "text/css",
         cssStyle
     );
@@ -147,8 +61,8 @@ void handleJS()
 {
     debugHttpJS();
 
-
-    sendProgmemFile(
+    server.send_P(
+        200,
         "application/javascript",
         JS_PAGE
     );
@@ -163,12 +77,9 @@ void handleStatus()
 {
     debugHttpStatus();
 
-
     String json = "{";
 
-
     json += "\"wifi\":";
-
 
     json += (
         WiFi.status() == WL_CONNECTED
@@ -176,40 +87,29 @@ void handleStatus()
         : "false"
     );
 
-
     json += ",\"ssid\":\"";
-
 
     json += WiFi.SSID();
 
-
     json += "\"";
-
 
     json += ",\"ip\":\"";
 
-
     json += WiFi.localIP().toString();
-
 
     json += "\"";
 
-
     json += ",\"rssi\":";
-
 
     json += String(
         WiFi.RSSI()
     );
 
-
     json += ",\"uptime\":";
-
 
     json += String(
         millis() / 1000
     );
-
 
     json += "}";
 
@@ -230,17 +130,13 @@ void handleTemperatures()
 {
     debugHttpTemperatures();
 
-
     String json = "{";
 
-
     json += "\"count\":";
-
 
     json += String(
         sensorCount
     );
-
 
     json += ",\"temperatures\":[";
 
@@ -255,7 +151,6 @@ void handleTemperatures()
         {
             json += ",";
         }
-
 
         json += String(
             temperatures[i],
@@ -290,16 +185,13 @@ void handleLED()
     {
         debugErrorMissingColor();
 
-
         server.send(
             400,
             "application/json",
             "{\"ok\":false,\"error\":\"missing color\"}"
         );
 
-
         debugHttpLedEnd();
-
 
         return;
     }
@@ -307,7 +199,6 @@ void handleLED()
 
     String color =
         server.arg("color");
-
 
     color.toLowerCase();
 
@@ -327,7 +218,6 @@ void handleLED()
     {
         debugHttpLedBlue();
 
-
         ledBlue();
     }
 
@@ -341,7 +231,6 @@ void handleLED()
     )
     {
         debugHttpLedGreen();
-
 
         ledGreen();
     }
@@ -357,7 +246,6 @@ void handleLED()
     {
         debugHttpLedRed();
 
-
         ledRed();
     }
 
@@ -371,7 +259,6 @@ void handleLED()
     )
     {
         debugHttpLedOff();
-
 
         ledsOff();
     }
@@ -387,16 +274,13 @@ void handleLED()
             color
         );
 
-
         server.send(
             400,
             "application/json",
             "{\"ok\":false,\"error\":\"unknown color\"}"
         );
 
-
         debugHttpLedEnd();
-
 
         return;
     }
@@ -408,16 +292,13 @@ void handleLED()
 
     debugHttpResponseStart();
 
-
     server.send(
         200,
         "application/json",
         "{\"ok\":true}"
     );
 
-
     debugHttpResponseEnd();
-
 
     debugHttpLedEnd();
 }
@@ -432,126 +313,111 @@ void handleBuzzer()
     debugHttpBuzzerStart();
 
 
+    // ========================================================
+    // VERIFICATION ACTION
+    // ========================================================
+
     if (
-        !server.hasArg("color")
+        !server.hasArg("action")
     )
     {
         debugErrorMissingColor();
 
-
         server.send(
             400,
             "application/json",
-            "{\"ok\":false,\"error\":\"missing color\"}"
+            "{\"ok\":false,\"error\":\"missing action\"}"
         );
 
-
         debugHttpBuzzerEnd();
-
 
         return;
     }
 
 
-    String color =
-        server.arg("color");
+    String action =
+        server.arg("action");
 
-
-    color.toLowerCase();
+    action.toLowerCase();
 
 
     debugHttpBuzzerCommand(
-        color
+        action
     );
 
 
     // ========================================================
-    // ROUGE
+    // BEEP SIMPLE
     // ========================================================
 
     if (
-        color == "red"
+        action == "beep"
     )
     {
-        debugHttpBuzzerRed();
-
-
-        ledRed();
+        simpleBeep();
     }
 
 
     // ========================================================
-    // VERT
+    // SUCCESS
     // ========================================================
 
     else if (
-        color == "green"
+        action == "success"
     )
     {
-        debugHttpBuzzerGreen();
-
-
-        ledGreen();
+        successBeep();
     }
 
 
     // ========================================================
-    // BLEU
+    // WIFI OK
     // ========================================================
 
     else if (
-        color == "blue"
+        action == "wifi"
     )
     {
-        debugHttpBuzzerBlue();
-
-
-        ledBlue();
+        wifiSuccessBeep();
     }
 
 
     // ========================================================
-    // OFF
+    // ERREUR
     // ========================================================
 
     else if (
-        color == "off"
+        action == "error"
     )
     {
-        debugHttpBuzzerOff();
-
-
-        ledsOff();
+        wifiFailureBeep();
     }
 
 
     // ========================================================
-    // INCONNU
+    // ACTION INCONNUE
     // ========================================================
 
     else
     {
         debugErrorUnknownBuzzerColor(
-            color
+            action
         );
-
 
         server.send(
             400,
             "application/json",
-            "{\"ok\":false,\"error\":\"unknown color\"}"
+            "{\"ok\":false,\"error\":\"unknown action\"}"
         );
 
-
         debugHttpBuzzerEnd();
-
 
         return;
     }
 
 
     // ========================================================
-    // REPONSE
+    // REPONSE HTTP
     // ========================================================
 
     server.send(
@@ -560,9 +426,7 @@ void handleBuzzer()
         "{\"ok\":true}"
     );
 
-
     debugHttpBuzzerResponse();
-
 
     debugHttpBuzzerEnd();
 }
@@ -577,7 +441,6 @@ void handleNotFound()
     debugHttp404(
         server.uri()
     );
-
 
     server.send(
         404,
@@ -622,7 +485,7 @@ void webserverInit()
 
 
     // ========================================================
-    // API
+    // API STATUS
     // ========================================================
 
     server.on(
@@ -632,6 +495,10 @@ void webserverInit()
     );
 
 
+    // ========================================================
+    // API TEMPERATURES
+    // ========================================================
+
     server.on(
         "/api/temperatures",
         HTTP_GET,
@@ -639,12 +506,20 @@ void webserverInit()
     );
 
 
+    // ========================================================
+    // API LED
+    // ========================================================
+
     server.on(
         "/api/led",
         HTTP_GET,
         handleLED
     );
 
+
+    // ========================================================
+    // API BUZZER
+    // ========================================================
 
     server.on(
         "/api/buzzer",
@@ -668,9 +543,7 @@ void webserverInit()
 
     server.begin();
 
-
     debugWebserverOk();
-
 
     debugSystemReadyWeb();
 }
