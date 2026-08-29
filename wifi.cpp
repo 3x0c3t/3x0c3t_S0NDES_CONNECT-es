@@ -9,21 +9,42 @@
 #include "leds.h"
 
 
+// === WIFI INIT
 void wifiInit()
 {
-    WiFi.mode(WIFI_STA);
+    // === MODE STATION
+    WiFi.mode(
+        WIFI_STA
+    );
 
-    WiFi.hostname(HOSTNAME);
 
+    // === HOSTNAME
+    WiFi.hostname(
+        HOSTNAME
+    );
+
+
+    // === RECONNEXION AUTOMATIQUE
+    WiFi.setAutoReconnect(
+        true
+    );
+
+
+    // === CONNEXION WIFI
     WiFi.begin(
         WIFI_SSID,
         WIFI_PASSWORD
     );
 
 
-    Serial.print("WiFi");
+    // === ATTENTE CONNEXION
+    Serial.print(
+        "WiFi"
+    );
+
 
     uint8_t timeout = 0;
+
 
     while (
         WiFi.status() != WL_CONNECTED &&
@@ -32,7 +53,9 @@ void wifiInit()
     {
         delay(500);
 
-        Serial.print(".");
+        Serial.print(
+            "."
+        );
 
         timeout++;
     }
@@ -45,28 +68,53 @@ void wifiInit()
     // WIFI OK
     // ========================================================
 
-    if (WiFi.status() == WL_CONNECTED)
+    if (
+        WiFi.status() == WL_CONNECTED
+    )
     {
-        Serial.println("WiFi OK");
-
-        String ssid = WiFi.SSID();
-        String ip = WiFi.localIP().toString();
-
-
-        Serial.print("SSID : ");
-        Serial.println(ssid);
-
-        Serial.print("IP   : ");
-        Serial.println(ip);
+        Serial.println(
+            "WiFi OK"
+        );
 
 
-        bootWifiStatus(true);
+        String ssid =
+            WiFi.SSID();
 
+        String ip =
+            WiFi.localIP().toString();
+
+
+        Serial.print(
+            "SSID : "
+        );
+
+        Serial.println(
+            ssid
+        );
+
+
+        Serial.print(
+            "IP   : "
+        );
+
+        Serial.println(
+            ip
+        );
+
+
+        // === BOOT WIFI
+        bootWifiStatus(
+            true
+        );
+
+
+        // === BOOT IP
         bootIpAddress(
             ip.c_str()
         );
 
 
+        // === WIFI SCREEN
         wifiScreen(
             true,
             ssid,
@@ -74,12 +122,11 @@ void wifiInit()
         );
 
 
-        // ----------------------------------------------------
-        // CONNEXION REUSSIE
-        // ----------------------------------------------------
-
+        // === CONNEXION REUSSIE
         wifiSuccessBeep();
 
+
+        // === LED VERTE
         ledsGreenBlink3();
     }
 
@@ -90,12 +137,18 @@ void wifiInit()
 
     else
     {
-        Serial.println("WiFi FAIL");
+        Serial.println(
+            "WiFi FAIL"
+        );
 
 
-        bootWifiStatus(false);
+        // === BOOT WIFI
+        bootWifiStatus(
+            false
+        );
 
 
+        // === WIFI SCREEN
         wifiScreen(
             false,
             "",
@@ -103,12 +156,17 @@ void wifiInit()
         );
 
 
-        // ----------------------------------------------------
-        // CONNEXION ECHOUEE
-        // ----------------------------------------------------
-
+        // === CONNEXION ECHOUEE
         wifiFailureBeep();
 
+
+        // === LED ROUGE
         ledsRedBlink3();
+
+
+        // === WIFI RECONNEXION
+        Serial.println(
+            "WiFi : reconnexion automatique active"
+        );
     }
 }
