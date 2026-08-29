@@ -6,7 +6,6 @@
 
 #include "config.h"
 #include "settings.h"
-#include "debug.h"
 
 
 // ============================================================
@@ -64,6 +63,46 @@ static const unsigned long CONVERSION_TIME_MS = 750;
 
 
 // ============================================================
+// AFFICHER ADRESSE
+// ============================================================
+
+void printSensorAddress(
+    DeviceAddress address
+)
+{
+    for (
+        uint8_t i = 0;
+        i < 8;
+        i++
+    )
+    {
+        if (
+            address[i] < 16
+        )
+        {
+            Serial.print(
+                "0"
+            );
+        }
+
+        Serial.print(
+            address[i],
+            HEX
+        );
+
+        if (
+            i < 7
+        )
+        {
+            Serial.print(
+                " "
+            );
+        }
+    }
+}
+
+
+// ============================================================
 // INITIALISATION
 // ============================================================
 
@@ -94,9 +133,17 @@ void temperatureInit()
     }
 
 
-    debugTemperatureInit();
+    Serial.println();
 
-    debugTemperatureSensorCount(
+    Serial.println(
+        "DS18B20"
+    );
+
+    Serial.print(
+        "Sondes : "
+    );
+
+    Serial.println(
         sensorCount
     );
 
@@ -138,7 +185,11 @@ void temperatureInit()
         }
         else
         {
-            debugTemperatureSensorAddressError(
+            Serial.print(
+                "ERREUR adresse S"
+            );
+
+            Serial.println(
                 i + 1
             );
         }
@@ -219,7 +270,9 @@ void startTemperatureConversion()
         true;
 
 
-    debugTemperatureConversionStart();
+    Serial.println(
+        "CONVERSION START"
+    );
 }
 
 
@@ -330,7 +383,9 @@ void finishTemperatureConversion()
         millis();
 
 
-    debugTemperatureConversionEnd();
+    Serial.println(
+        "CONVERSION END"
+    );
 }
 
 

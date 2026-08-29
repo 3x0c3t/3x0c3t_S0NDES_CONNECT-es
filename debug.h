@@ -77,6 +77,7 @@ void debugWifiIp(
 );
 
 void debugWifiReconnectEnabled();
+
 void debugWifiReconnected();
 
 void debugWifiDisconnected(
@@ -131,6 +132,7 @@ void debugSystemReadyWeb();
 void debugHttpRoot();
 void debugHttpCSS();
 void debugHttpJS();
+
 void debugHttpStatus();
 void debugHttpTemperatures();
 

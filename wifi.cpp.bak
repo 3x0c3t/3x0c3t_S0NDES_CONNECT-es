@@ -2,12 +2,12 @@
 
 #include <ESP8266WiFi.h>
 
+#include "debug.h"
 #include "config.h"
 #include "oled.h"
 #include "bootscreen.h"
 #include "buzzer.h"
 #include "leds.h"
-#include "debug.h"
 
 
 // ============================================================
@@ -109,7 +109,9 @@ void wifiInit()
     // ATTENTE CONNEXION
     // ========================================================
 
-    debugWifiStart();
+    Serial.print(
+        "WiFi"
+    );
 
     uint8_t timeout = 0;
 
@@ -120,7 +122,9 @@ void wifiInit()
     {
         delay(500);
 
-        yield();
+        Serial.print(
+            "."
+        );
 
         timeout++;
     }
@@ -155,7 +159,9 @@ void wifiInit()
         wifiConnected =
             true;
 
-        debugWifiOk();
+        Serial.println(
+            "WiFi OK"
+        );
 
 
         String ssid =
@@ -165,12 +171,20 @@ void wifiInit()
             WiFi.localIP().toString();
 
 
-        debugWifiSsid(
+        Serial.print(
+            "SSID : "
+        );
+
+        Serial.println(
             ssid
         );
 
 
-        debugWifiIp(
+        Serial.print(
+            "IP   : "
+        );
+
+        Serial.println(
             ip
         );
 
@@ -229,7 +243,9 @@ void wifiInit()
             false;
 
 
-        debugWifiFail();
+        Serial.println(
+            "WiFi FAIL"
+        );
 
 
         // ====================================================
@@ -270,7 +286,9 @@ void wifiInit()
         // RECONNEXION
         // ====================================================
 
-        debugWifiReconnectEnabled();
+        Serial.println(
+            "WiFi : reconnexion automatique active"
+        );
 
 
         lastReconnectAttempt =
@@ -331,7 +349,11 @@ void wifiLoop()
                 WiFi.localIP().toString();
 
 
-            debugWifiSsid(
+            Serial.print(
+                "SSID : "
+            );
+
+            Serial.println(
                 ssid
             );
 
