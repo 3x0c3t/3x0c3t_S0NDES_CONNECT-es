@@ -3,15 +3,29 @@
 #include "settings.h"
 #include "debug.h"
 
-// === INITIALISATION ===
+
+// ============================================================
+// INITIALISATION
+// ============================================================
 
 void ledsInit()
 {
     debugLedsInitStart();
 
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
-    pinMode(LED_RED, OUTPUT);
+    pinMode(
+        LED_BLUE,
+        OUTPUT
+    );
+
+    pinMode(
+        LED_GREEN,
+        OUTPUT
+    );
+
+    pinMode(
+        LED_RED,
+        OUTPUT
+    );
 
     ledsOff();
 
@@ -33,40 +47,55 @@ void ledsInit()
     debugLedsInitEnd();
 }
 
-// === LEDS OFF ===
+
+// ============================================================
+// LEDS OFF
+// ============================================================
 
 void ledsOff()
 {
-    digitalWrite(LED_BLUE, LOW);
-    digitalWrite(LED_GREEN, LOW);
-    digitalWrite(LED_RED, LOW);
+    digitalWrite(
+        LED_BLUE,
+        LOW
+    );
+
+    digitalWrite(
+        LED_GREEN,
+        LOW
+    );
+
+    digitalWrite(
+        LED_RED,
+        LOW
+    );
 
     debugLedsOff();
 }
 
-// === LED BLEUE ===
 
-// === LED BLEUE ===
+// ============================================================
+// LED BLEUE
+// ============================================================
 
 void ledBlue()
 {
-    pinMode(LED_BLUE, OUTPUT);
+    debugLedBlue();
 
-    digitalWrite(LED_GREEN, LOW);
-    digitalWrite(LED_RED, LOW);
-    digitalWrite(LED_BLUE, HIGH);
+    digitalWrite(
+        LED_BLUE,
+        HIGH
+    );
 
-    Serial.print("BLUE  GPIO14 = ");
-    Serial.println(digitalRead(LED_BLUE));
-
-    Serial.print("GREEN GPIO12 = ");
-    Serial.println(digitalRead(LED_GREEN));
-
-    Serial.print("RED   GPIO13 = ");
-    Serial.println(digitalRead(LED_RED));
+    debugLedBluePin(
+        LED_BLUE,
+        digitalRead(LED_BLUE)
+    );
 }
 
-// === LED VERTE ===
+
+// ============================================================
+// LED VERTE
+// ============================================================
 
 void ledGreen()
 {
@@ -83,7 +112,10 @@ void ledGreen()
     );
 }
 
-// === LED ROUGE ===
+
+// ============================================================
+// LED ROUGE
+// ============================================================
 
 void ledRed()
 {
@@ -100,7 +132,10 @@ void ledRed()
     );
 }
 
-// === CLIGNOTEMENT VERT 3 FOIS ===
+
+// ============================================================
+// CLIGNOTEMENT VERT 3 FOIS
+// ============================================================
 
 void ledsGreenBlink3()
 {
@@ -126,7 +161,10 @@ void ledsGreenBlink3()
     }
 }
 
-// === CLIGNOTEMENT ROUGE 3 FOIS ===
+
+// ============================================================
+// CLIGNOTEMENT ROUGE 3 FOIS
+// ============================================================
 
 void ledsRedBlink3()
 {
@@ -152,7 +190,10 @@ void ledsRedBlink3()
     }
 }
 
-// === TEST LEDS ===
+
+// ============================================================
+// TEST LEDS
+// ============================================================
 
 void ledsTest()
 {
@@ -161,15 +202,21 @@ void ledsTest()
     ledsOff();
 
     ledRed();
+
     delay(1000);
+
     ledsOff();
 
     ledGreen();
+
     delay(1000);
+
     ledsOff();
 
     ledBlue();
+
     delay(1000);
+
     ledsOff();
 
     debugLedsTestEnd();
