@@ -46,19 +46,24 @@ void ledsOff()
 
 // === LED BLEUE ===
 
+// === LED BLEUE ===
+
 void ledBlue()
 {
-    debugLedBlue();
+    pinMode(LED_BLUE, OUTPUT);
 
-    digitalWrite(
-        LED_BLUE,
-        HIGH
-    );
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_BLUE, HIGH);
 
-    debugLedBluePin(
-        LED_BLUE,
-        digitalRead(LED_BLUE)
-    );
+    Serial.print("BLUE  GPIO14 = ");
+    Serial.println(digitalRead(LED_BLUE));
+
+    Serial.print("GREEN GPIO12 = ");
+    Serial.println(digitalRead(LED_GREEN));
+
+    Serial.print("RED   GPIO13 = ");
+    Serial.println(digitalRead(LED_RED));
 }
 
 // === LED VERTE ===
@@ -157,18 +162,14 @@ void ledsTest()
 
     ledRed();
     delay(1000);
-
     ledsOff();
-
 
     ledGreen();
     delay(1000);
-
     ledsOff();
 
-        ledBlue();
+    ledBlue();
     delay(1000);
-
     ledsOff();
 
     debugLedsTestEnd();

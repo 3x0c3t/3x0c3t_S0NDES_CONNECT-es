@@ -1,76 +1,107 @@
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
 
 #include "config.h"
-#include "settings.h"
-
-#include "leds.h"
-#include "buzzer.h"
 #include "oled.h"
 #include "splashScreen.h"
 #include "bootscreen.h"
+#include "leds.h"
+#include "buzzer.h"
 #include "wifi.h"
-#include "ota.h"
 #include "temperature.h"
 #include "webserver.h"
+#include "debug.h"
 
 // === SETUP ===
 
 void setup()
 {
     // === SERIAL ===
-    Serial.begin(SERIAL_BAUDRATE);
-    delay(500);
+
+    Serial.begin(
+        SERIAL_BAUDRATE
+    );
+
+    delay(100);
+
+    debugStartup();
 
     // === OLED ===
+
     oledInit();
 
-    // === NETTOYAGE ECRAN ===
     oled.clearBuffer();
     oled.sendBuffer();
 
     // === SPLASH SCREEN ===
+
     splashScreen();
 
-    // === BOOT SCREEN ===
-    bootScreen();
-
     // === LEDS ===
+
     ledsInit();
     ledsTest();
 
     // === BUZZER ===
+
     buzzerInit();
 
-    // === BUZZER STARTUP ===
-    startupMelody();
-
-    // === WIFI ===
-    wifiInit();
-
-    // === OTA ===
-    otaInit();
-
     // === TEMPERATURES ===
+
     temperatureInit();
 
-    // === WEBSERVER ===
-    webserverInit();
+    // === WIFI ===
 
-    // === FIN SETUP ===
-    Serial.println();
-    Serial.println("=== ! SYSTEME PRET ! ===");
+    wifiInit();
+
+    // === SERVEUR WEB ===
+
+    if (
+        WiFi.status() ==
+        WL_CONNECTED
+    )
+    {
+        webserverInit();
+    }
+    else
+    {
+        debugWebserverNotStarted();
+    }
+
+    // === AFFICHAGE TEMPERATURES ===
+
+    temperatureScreen();
+
+    // === SYSTEME PRET ===
+
+    debugSystemReady();
 }
 
 // === LOOP ===
 
 void loop()
 {
-    // === OTA ===
-    otaLoop();
+    // === SERVEUR HTTP ===
 
-    // === WEBSERVER ===
     webserverLoop();
 
     // === TEMPERATURES ===
+
     readTemperatures();
+
+    // === WIFI ===
+
+    if (
+        WiFi.status() !=
+        WL_CONNECTED
+    )
+    {
+        /*
+         * Pas de reconnexion automatique ici pour le moment.
+         */
+    }
+
+    // === PETITE PAUSE ===
+
+    yield();
 }

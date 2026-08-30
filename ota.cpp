@@ -1,22 +1,19 @@
 #include "ota.h"
 
-#include <ArduinoOTA.h>
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ArduinoOTA.h>
 
 #include "config.h"
 #include "debug.h"
 
-
-// ============================================================
-// OTA INIT
-// ============================================================
+// === OTA INIT ===
 
 void otaInit()
 {
     ArduinoOTA.setHostname(
         HOSTNAME
     );
-
 
     ArduinoOTA.onStart(
         []()
@@ -25,7 +22,6 @@ void otaInit()
         }
     );
 
-
     ArduinoOTA.onEnd(
         []()
         {
@@ -33,12 +29,8 @@ void otaInit()
         }
     );
 
-
     ArduinoOTA.onProgress(
-        [](
-            unsigned int progress,
-            unsigned int total
-        )
+        [](unsigned int progress, unsigned int total)
         {
             debugOtaProgress(
                 progress,
@@ -47,11 +39,8 @@ void otaInit()
         }
     );
 
-
     ArduinoOTA.onError(
-        [](
-            ota_error_t error
-        )
+        [](ota_error_t error)
         {
             debugOtaError(
                 error
@@ -59,16 +48,12 @@ void otaInit()
         }
     );
 
-
     ArduinoOTA.begin();
 
     debugOtaReady();
 }
 
-
-// ============================================================
-// OTA LOOP
-// ============================================================
+// === OTA LOOP ===
 
 void otaLoop()
 {

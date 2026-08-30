@@ -3,9 +3,20 @@
 
 void bootScreen();
 
-void bootLedStatus(bool ok);
-void bootBuzzerStatus(bool ok);
-void bootWifiStatus(bool ok);
-void bootIpAddress(const char* ip);
+void bootLedStatus(
+    bool ok
+);
+
+void bootBuzzerStatus(
+    bool ok
+);
+
+void bootWifiStatus(
+    bool ok
+);
+
+void bootIpAddress(
+    const char* ip
+);
 
 #endif
