@@ -1,33 +1,17 @@
 #include "leds.h"
-
 #include <Arduino.h>
-
 #include "settings.h"
 #include "debug.h"
 
-
-// ============================================================
-// INITIALISATION
-// ============================================================
+// === INITIALISATION ===
 
 void ledsInit()
 {
     debugLedsInitStart();
 
-    pinMode(
-        LED_BLUE,
-        OUTPUT
-    );
-
-    pinMode(
-        LED_GREEN,
-        OUTPUT
-    );
-
-    pinMode(
-        LED_RED,
-        OUTPUT
-    );
+    pinMode(LED_BLUE, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
 
     ledsOff();
 
@@ -49,49 +33,22 @@ void ledsInit()
     debugLedsInitEnd();
 }
 
-
-// ============================================================
-// LEDS OFF
-// ============================================================
+// === LEDS OFF ===
 
 void ledsOff()
 {
-    digitalWrite(
-        LED_BLUE,
-        LOW
-    );
-
-    digitalWrite(
-        LED_GREEN,
-        LOW
-    );
-
-    digitalWrite(
-        LED_RED,
-        LOW
-    );
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_RED, LOW);
 
     debugLedsOff();
 }
 
-
-// ============================================================
-// LED BLEUE
-// ============================================================
+// === LED BLEUE ===
 
 void ledBlue()
 {
     debugLedBlue();
-
-    digitalWrite(
-        LED_GREEN,
-        LOW
-    );
-
-    digitalWrite(
-        LED_RED,
-        LOW
-    );
 
     digitalWrite(
         LED_BLUE,
@@ -104,24 +61,11 @@ void ledBlue()
     );
 }
 
-
-// ============================================================
-// LED VERTE
-// ============================================================
+// === LED VERTE ===
 
 void ledGreen()
 {
     debugLedGreen();
-
-    digitalWrite(
-        LED_BLUE,
-        LOW
-    );
-
-    digitalWrite(
-        LED_RED,
-        LOW
-    );
 
     digitalWrite(
         LED_GREEN,
@@ -134,24 +78,11 @@ void ledGreen()
     );
 }
 
-
-// ============================================================
-// LED ROUGE
-// ============================================================
+// === LED ROUGE ===
 
 void ledRed()
 {
     debugLedRed();
-
-    digitalWrite(
-        LED_BLUE,
-        LOW
-    );
-
-    digitalWrite(
-        LED_GREEN,
-        LOW
-    );
 
     digitalWrite(
         LED_RED,
@@ -164,96 +95,81 @@ void ledRed()
     );
 }
 
+// === CLIGNOTEMENT VERT 3 FOIS ===
 
-// ============================================================
-// TEST LEDS
-// ============================================================
+void ledsGreenBlink3()
+{
+    for (
+        uint8_t i = 0;
+        i < 3;
+        i++
+    )
+    {
+        digitalWrite(
+            LED_GREEN,
+            HIGH
+        );
+
+        delay(200);
+
+        digitalWrite(
+            LED_GREEN,
+            LOW
+        );
+
+        delay(200);
+    }
+}
+
+// === CLIGNOTEMENT ROUGE 3 FOIS ===
+
+void ledsRedBlink3()
+{
+    for (
+        uint8_t i = 0;
+        i < 3;
+        i++
+    )
+    {
+        digitalWrite(
+            LED_RED,
+            HIGH
+        );
+
+        delay(200);
+
+        digitalWrite(
+            LED_RED,
+            LOW
+        );
+
+        delay(200);
+    }
+}
+
+// === TEST LEDS ===
 
 void ledsTest()
 {
     debugLedsTestStart();
 
-    ledBlue();
+    ledsOff();
+
+    ledRed();
     delay(1000);
+
+    ledsOff();
+
 
     ledGreen();
     delay(1000);
 
-    ledRed();
+    ledsOff();
+
+        ledBlue();
     delay(1000);
 
     ledsOff();
 
     debugLedsTestEnd();
-}
-
-
-// ============================================================
-// ARC-EN-CIEL
-// ============================================================
-
-void ledsRainbow()
-{
-    debugLedsRainbow();
-
-    ledRed();
-    delay(500);
-
-    ledGreen();
-    delay(500);
-
-    ledBlue();
-    delay(500);
-
-    ledsOff();
-}
-
-
-// ============================================================
-// VERT : 3 CLIGNOTEMENTS
-// ============================================================
-
-void ledsGreenBlink3()
-{
-    debugLedGreenBlinkStart();
-
-    for (
-        int i = 0;
-        i < 3;
-        i++
-    )
-    {
-        ledGreen();
-
-        delay(250);
-
-        ledsOff();
-
-        delay(250);
-    }
-}
-
-
-// ============================================================
-// ROUGE : 3 CLIGNOTEMENTS
-// ============================================================
-
-void ledsRedBlink3()
-{
-    debugLedRedBlinkStart();
-
-    for (
-        int i = 0;
-        i < 3;
-        i++
-    )
-    {
-        ledRed();
-
-        delay(250);
-
-        ledsOff();
-
-        delay(250);
-    }
 }
