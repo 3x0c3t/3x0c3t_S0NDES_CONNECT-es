@@ -8,11 +8,6 @@
 #include "settings.h"
 #include "debug.h"
 
-
-// ============================================================
-// DS18B20
-// ============================================================
-
 OneWire oneWire(
     ONE_WIRE_BUS
 );
@@ -21,57 +16,27 @@ DallasTemperature sensors(
     &oneWire
 );
 
-
-// ============================================================
-// TEMPERATURES
-// ============================================================
-
 float temperatures[MAX_SENSORS];
 
 uint8_t sensorCount = 0;
 
-
-// ============================================================
-// ADRESSES DS18B20
-// ============================================================
-
 DeviceAddress sensorAddresses[MAX_SENSORS];
-
-
-// ============================================================
-// CONVERSION
-// ============================================================
 
 static bool conversionRunning = false;
 
 static unsigned long conversionStart = 0;
 
-
-// ============================================================
-// INTERVALLE MESURE
-// ============================================================
-
 static unsigned long lastMeasurement = 0;
 
 static const unsigned long MEASUREMENT_INTERVAL = 5000;
 
-
-// ============================================================
-// TEMPS CONVERSION
-// ============================================================
-
 static const unsigned long CONVERSION_TIME_MS = 750;
 
-
-// ============================================================
-// INITIALISATION
-// ============================================================
+// === INITIALISATION TEMPERATURES ===
 
 void temperatureInit()
 {
     sensors.begin();
-
-    debugTemperatureInit();
 
     sensorCount =
         sensors.getDeviceCount();
@@ -85,14 +50,13 @@ void temperatureInit()
             MAX_SENSORS;
     }
 
+    debugTemperatureInit();
+
     debugTemperatureSensorCount(
         sensorCount
     );
 
-
-    // ========================================================
-    // RECUPERATION ADRESSES
-    // ========================================================
+    // === RECUPERATION ADRESSES ===
 
     for (
         uint8_t i = 0;
@@ -120,10 +84,7 @@ void temperatureInit()
         }
     }
 
-
-    // ========================================================
-    // RESOLUTION
-    // ========================================================
+    // === RESOLUTION ===
 
     for (
         uint8_t i = 0;
@@ -137,19 +98,13 @@ void temperatureInit()
         );
     }
 
-
-    // ========================================================
-    // CONVERSION NON BLOQUANTE
-    // ========================================================
+    // === CONVERSION NON BLOQUANTE ===
 
     sensors.setWaitForConversion(
         false
     );
 
-
-    // ========================================================
-    // INITIALISATION TEMPERATURES
-    // ========================================================
+    // === VALEURS INITIALES ===
 
     for (
         uint8_t i = 0;
@@ -161,20 +116,26 @@ void temperatureInit()
             DEVICE_DISCONNECTED_C;
     }
 
+    // === PREMIERE MESURE ===
 
-    // ========================================================
-    // PREMIERE MESURE IMMEDIATE
-    // ========================================================
+    if (
+        sensorCount > 0
+    )
+    {
+        startTemperatureConversion();
+
+        delay(
+            CONVERSION_TIME_MS
+        );
+
+        finishTemperatureConversion();
+    }
 
     lastMeasurement =
-        millis() -
-        MEASUREMENT_INTERVAL;
+        millis();
 }
 
-
-// ============================================================
-// LANCER CONVERSION
-// ============================================================
+// === LANCER CONVERSION ===
 
 void startTemperatureConversion()
 {
@@ -196,10 +157,7 @@ void startTemperatureConversion()
     debugTemperatureConversionStart();
 }
 
-
-// ============================================================
-// TERMINER CONVERSION
-// ============================================================
+// === TERMINER CONVERSION ===
 
 void finishTemperatureConversion()
 {
@@ -210,11 +168,6 @@ void finishTemperatureConversion()
         return;
     }
 
-
-    // ========================================================
-    // ATTENTE CONVERSION
-    // ========================================================
-
     if (
         millis() -
         conversionStart <
@@ -224,10 +177,7 @@ void finishTemperatureConversion()
         return;
     }
 
-
-    // ========================================================
-    // LECTURE SONDES
-    // ========================================================
+    // === LECTURE DES SONDES ===
 
     for (
         uint8_t i = 0;
@@ -239,11 +189,6 @@ void finishTemperatureConversion()
             sensors.getTempC(
                 sensorAddresses[i]
             );
-
-
-        // ====================================================
-        // TEMPERATURE VALIDE
-        // ====================================================
 
         if (
             temperature !=
@@ -258,12 +203,6 @@ void finishTemperatureConversion()
                 temperature
             );
         }
-
-
-        // ====================================================
-        // ERREUR LECTURE
-        // ====================================================
-
         else
         {
             debugTemperatureError(
@@ -271,7 +210,6 @@ void finishTemperatureConversion()
             );
         }
     }
-
 
     conversionRunning =
         false;
@@ -282,17 +220,10 @@ void finishTemperatureConversion()
     debugTemperatureConversionEnd();
 }
 
-
-// ============================================================
-// LECTURE TEMPERATURES
-// ============================================================
+// === LECTURE TEMPERATURES ===
 
 void readTemperatures()
 {
-    // ========================================================
-    // CONVERSION EN COURS
-    // ========================================================
-
     if (
         conversionRunning
     )
@@ -302,11 +233,6 @@ void readTemperatures()
         return;
     }
 
-
-    // ========================================================
-    // ATTENTE INTERVALLE
-    // ========================================================
-
     if (
         millis() -
         lastMeasurement <
@@ -315,11 +241,6 @@ void readTemperatures()
     {
         return;
     }
-
-
-    // ========================================================
-    // NOUVELLE CONVERSION
-    // ========================================================
 
     startTemperatureConversion();
 }
