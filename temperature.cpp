@@ -71,18 +71,10 @@ void temperatureInit()
 {
     sensors.begin();
 
-
-    // ========================================================
-    // NOMBRE SONDES
-    // ========================================================
+    debugTemperatureInit();
 
     sensorCount =
         sensors.getDeviceCount();
-
-
-    // ========================================================
-    // LIMITE SONDES
-    // ========================================================
 
     if (
         sensorCount >
@@ -92,9 +84,6 @@ void temperatureInit()
         sensorCount =
             MAX_SENSORS;
     }
-
-
-    debugTemperatureInit();
 
     debugTemperatureSensorCount(
         sensorCount
@@ -118,24 +107,10 @@ void temperatureInit()
             )
         )
         {
-            Serial.print(
-                "S"
-            );
-
-            Serial.print(
-                i + 1
-            );
-
-            Serial.print(
-                " adresse : "
-            );
-
             debugTemperatureSensorAddress(
                 i + 1,
                 sensorAddresses[i]
             );
-
-            Serial.println();
         }
         else
         {
@@ -210,7 +185,6 @@ void startTemperatureConversion()
         return;
     }
 
-
     sensors.requestTemperatures();
 
     conversionStart =
@@ -218,7 +192,6 @@ void startTemperatureConversion()
 
     conversionRunning =
         true;
-
 
     debugTemperatureConversionStart();
 }
@@ -279,46 +252,22 @@ void finishTemperatureConversion()
         {
             temperatures[i] =
                 temperature;
+
+            debugTemperature(
+                i + 1,
+                temperature
+            );
         }
-
-
-        Serial.print(
-            "S"
-        );
-
-        Serial.print(
-            i + 1
-        );
-
-        Serial.print(
-            " : "
-        );
 
 
         // ====================================================
         // ERREUR LECTURE
         // ====================================================
 
-        if (
-            temperature ==
-            DEVICE_DISCONNECTED_C
-        )
-        {
-            Serial.println(
-                "ERREUR DECONNEXION"
-            );
-        }
-
-
-        // ====================================================
-        // TEMPERATURE
-        // ====================================================
-
         else
         {
-            Serial.println(
-                temperature,
-                2
+            debugTemperatureError(
+                i + 1
             );
         }
     }
@@ -329,7 +278,6 @@ void finishTemperatureConversion()
 
     lastMeasurement =
         millis();
-
 
     debugTemperatureConversionEnd();
 }
