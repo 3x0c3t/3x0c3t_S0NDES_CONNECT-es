@@ -6,6 +6,8 @@
 
 #include "config.h"
 #include "settings.h"
+#include "temperature.h"
+
 #include "debug.h"
 
 
@@ -148,56 +150,51 @@ void temperatureScreen()
 {
     oled.clearBuffer();
 
-    oled.setFont(
-        u8g2_font_5x8_mr
-    );
+    oled.setFont(u8g2_font_6x10_tf);
 
-    oled.drawStr(
-        0,
-        8,
-        "FRIGO_20260803"
-    );
+    oled.drawStr(19, 10, "1");
+    oled.drawStr(62, 10, "2");
+    oled.drawStr(105, 10, "3");
 
-    int y = 22;
+    oled.drawVLine(42, 0, 64);
+    oled.drawVLine(85, 0, 64);
 
+    char buffer[12];
 
-    // ========================================================
-    // AFFICHAGE SONDES
-    // ========================================================
+    oled.setFont(u8g2_font_7x14B_tf);
 
-    for (
-        uint8_t i = 0;
-        i < sensorCount;
-        i++
-    )
+    for (uint8_t i = 0; i < 3; i++)
     {
-        oled.setCursor(
-            0,
-            y
-        );
+        if (temperatures[i] == DEVICE_DISCONNECTED_C)
+        {
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "---"
+            );
+        }
+        else
+        {
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "%.1fC",
+                temperatures[i]
+            );
+        }
 
-        oled.print(
-            "S"
-        );
+        int16_t width =
+            oled.getStrWidth(buffer);
 
-        oled.print(
-            i + 1
-        );
+        int16_t x =
+            (i * 43) +
+            ((43 - width) / 2);
 
-        oled.print(
-            ": "
+        oled.drawStr(
+            x,
+            40,
+            buffer
         );
-
-        oled.print(
-            temperatures[i],
-            2
-        );
-
-        oled.print(
-            " C"
-        );
-
-        y += 10;
     }
 
     oled.sendBuffer();
