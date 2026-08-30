@@ -130,7 +130,8 @@ void temperatureInit()
                 " adresse : "
             );
 
-            printSensorAddress(
+            debugTemperatureSensorAddress(
+                i + 1,
                 sensorAddresses[i]
             );
 

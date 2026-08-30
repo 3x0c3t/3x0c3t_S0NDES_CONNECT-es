@@ -68,6 +68,9 @@ const char* wifiStatusText(
 
 void wifiInit()
 {
+    debugWifiStart();
+
+
     // ========================================================
     // MODE STATION
     // ========================================================
@@ -109,8 +112,6 @@ void wifiInit()
     // ATTENTE CONNEXION
     // ========================================================
 
-    debugWifiStart();
-
     uint8_t timeout = 0;
 
     while (
@@ -120,27 +121,21 @@ void wifiInit()
     {
         delay(500);
 
-        yield();
-
         timeout++;
     }
-
-
-    Serial.println();
 
 
     // ========================================================
     // WIFI STATUS
     // ========================================================
 
-    Serial.print(
-        "WiFi STATUS : "
-    );
-
-    Serial.println(
+    String status =
         wifiStatusText(
             WiFi.status()
-        )
+        );
+
+    debugWifiStatus(
+        status
     );
 
 
@@ -168,7 +163,6 @@ void wifiInit()
         debugWifiSsid(
             ssid
         );
-
 
         debugWifiIp(
             ip
@@ -227,7 +221,6 @@ void wifiInit()
     {
         wifiConnected =
             false;
-
 
         debugWifiFail();
 
@@ -309,19 +302,7 @@ void wifiLoop()
                 true;
 
 
-            Serial.println();
-
-            Serial.println(
-                "=============================="
-            );
-
-            Serial.println(
-                "WiFi RECONNECTE"
-            );
-
-            Serial.println(
-                "=============================="
-            );
+            debugWifiReconnected();
 
 
             String ssid =
@@ -335,12 +316,7 @@ void wifiLoop()
                 ssid
             );
 
-
-            Serial.print(
-                "IP   : "
-            );
-
-            Serial.println(
+            debugWifiIp(
                 ip
             );
 
@@ -405,26 +381,7 @@ void wifiLoop()
             false;
 
 
-        Serial.println();
-
-        Serial.println(
-            "=============================="
-        );
-
-        Serial.println(
-            "WiFi DECONNECTE"
-        );
-
-        Serial.println(
-            "=============================="
-        );
-
-
-        Serial.print(
-            "WiFi STATUS : "
-        );
-
-        Serial.println(
+        debugWifiDisconnected(
             wifiStatusText(
                 status
             )
@@ -446,18 +403,7 @@ void wifiLoop()
             millis();
 
 
-        Serial.println();
-
-        Serial.println(
-            "WiFi RECONNECT"
-        );
-
-
-        Serial.print(
-            "WiFi STATUS : "
-        );
-
-        Serial.println(
+        debugWifiReconnect(
             wifiStatusText(
                 status
             )
